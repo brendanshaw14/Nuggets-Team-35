@@ -2,6 +2,8 @@
 ## Design Spec
 ### Team 35, Winter, 2023
 
+Team Members: Ming Cheng, Romeo Myrthil, Brendan Shaw
+
 > This **template** includes some gray text meant to explain how to use the template; delete all of them in your document!
 
 According to the [Requirements Spec](REQUIREMENTS.md), the Nuggets game requires two standalone programs: a client and a server.
