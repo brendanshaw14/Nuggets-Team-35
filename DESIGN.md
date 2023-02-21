@@ -1,6 +1,6 @@
 # CS50 Nuggets
 ## Design Spec
-### Team name, term, year
+### Team 35, Winter, 2023
 
 > This **template** includes some gray text meant to explain how to use the template; delete all of them in your document!
 
@@ -9,15 +9,6 @@ Our design also includes x, y, z modules.
 We describe each program and module separately.
 We do not describe the `support` library nor the modules that enable features that go beyond the spec.
 We avoid repeating information that is provided in the requirements spec.
-
-## Player
-
-> Teams of 3 students should delete this section.
-
-The *client* acts in one of two modes:
-
- 1. *spectator*, the passive spectator mode described in the requirements spec.
- 2. *player*, the interactive game-playing mode described in the requirements spec.
 
 ### User interface
 
