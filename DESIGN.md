@@ -192,15 +192,50 @@ The grid module ultimately stores and maintains the game map itself, containing 
 
 ### Functional decomposition
 
+* grid_init - reads a map into a string and returns a grid_t structure with the string, and the width and height of the map.
+* grid_placeGold - takes the grid and the gold constants and returns a hashmap of gold (where the index to a point in the string is the key, and the amount of gold is the item).
+* grid_getGoldLeft - return the amount of gold left to claim on the map.
 
 > List each of the main functions implemented by this module, with a phrase or sentence description of each.
 
 ### Pseudo code for logic/algorithmic flow
 
+#### grid_init
+```c
+	loop through lines in map.txt
+	  add lines to char*
+	  for each line that is read, add +1 to height
+	get width by dividing length of string by height
+```
+
+#### grid_placeGold
+```c
+	initialize hashtable
+	loop while goldplaced != goldTotal
+      get a random index in grid string
+	  check if index is valid position
+		get a random int newGoldPile between goldMin and goldMax
+		if goldplaced + newGoldPile < goldTotal
+		  insert in hashtable
+```
+
+#### grid_getGoldLeft
+```c
+	return gridStruct->goldTotalLeft
+```
+
 > For any non-trivial function, add a level-4 #### header and provide tab-indented pseudocode.
 > This pseudocode should be independent of the programming language.
 
 ### Major data structures
+
+#### Hashtable
+
+A data structure `hashtable` will be used to store the locations and amounts of gold piles across the map. The key would in this case be an index in the map string, which would be a spot on the map, and the item would an amount of gold stored as an int.
+
+#### Bag
+
+A data structure `bag` will be used to store the players of the game. The key is the name of the player that the client joins with, and the item is a `player_t` struct storing position, the name, and the amount of gold
 
 > Describe each major data structure in this module: what information does it represent, how does it represent the data, and what are its members.
 > This description should be independent of the programming language.
