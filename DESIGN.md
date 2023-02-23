@@ -116,6 +116,7 @@ struct Player {
 	int player_position; 
 	char* player_name; 
 	int player_amountOfGold; 
+	char* player_seen;  
 }; 
 ```
 
@@ -125,48 +126,54 @@ struct Player {
 
 3. `player_amountOfGold` is an integer indicating the amount of gold found by current player. Every time a player finds a gold, we should update its value.
 
+4. `player_seen` is a string indicating the positions that this player has aleady seen. It should have the same length as the total map.
+
 The functions it contains are listed below.
 
 ### Functional decomposition
 
-#### `player_getName`
+#### player_getName
 
 The definition of this function is `char* player_getName();`. It returns the name of the current player. 
 
-#### `player_getPosition`
+#### player_getPosition
 
 The definition of this function is `int player_getPosition();`. It returns an integer, as an index of the string, to represent the position of current player. 
 
-#### `player_getGold`
+#### player_getGold
 
 The definition of this function is `int player_getGold();`. It returns the amount of golds found by the current player. 
 
-#### `player_move`
+#### player_move
 
 The definition of this function is `bool player_move(char k);`. It returns `true` when the input character `k` is valid, and vice versa.
+
+#### player_getVisibility
+
+The definition of this function is `void player_getVisibility(char* player_seen, int position)`. It modifies the `player_seen` string.   
 
 
 ### Pseudo code for logic/algorithmic flow
 
-#### `player_getName`
+#### player_getName
 
 ```c
 	return Player->player_name; 
 ```
 
-#### `player_getPosition`
+#### player_getPosition
 
 ```c
 	return Player->player_position; 
 ```
 
-#### `player_getGold`
+#### player_getGold
 
 ```c
 	return Player->player_amountOfGold; 
 ```
 
-#### `player_move` 
+#### player_move
 
 ```c
 	if input char is not valid:
@@ -178,6 +185,19 @@ The definition of this function is `bool player_move(char k);`. It returns `true
 			update the player's position
 			return true; 
 ```
+
+
+
+
+#### player_getVisibility
+
+```c
+	initialize the "player_seen" string with empty spaces
+	loop for all chars in the string: 
+		if the distance between current char and the player is smaller than the visibility range:
+			update current char
+```
+
 
 ### Major data structures
 
