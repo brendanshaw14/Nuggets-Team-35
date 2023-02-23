@@ -185,7 +185,21 @@ We only need a string to represent player's name and an integer for player's pos
 
 ## Grid
 
-The grid module ultimately stores and maintains the game map itself, containing methods allowing for easy access and updates to information in the map. 
+The grid module ultimately stores and maintains the game map itself, containing methods allowing for easy access and updates to information in the map.  
+
+It mainly contains the following:
+```c
+struct Grid {
+	char* grid;
+	Int width;
+	Int height;
+	Int numPlayers;
+	bag_t* players; 
+	int goldTotalLeft; 
+	hashtable_t* goldLocation;
+}; 
+```
+
 > List and briefly describe any modules that comprise your client, other than the main module.
  
 > Repeat this section for each module that is included in either the client or server.
@@ -193,7 +207,7 @@ The grid module ultimately stores and maintains the game map itself, containing 
 ### Functional decomposition
 
 * `grid_init` - reads a map into a string and returns a grid_t structure with the string, and the width and height of the map.
-* `grid_placeGold` - takes the grid and the gold constants and returns a hashmap of gold (where the index to a point in the string is the key, and the amount of gold is the item).
+* `grid_placeGold` - takes the grid and the gold constants and returns a hashtable of gold (where the index to a point in the string is the key, and the amount of gold is the item).
 * `grid_getGoldLeft` - return the amount of gold left to claim on the map.
 
 > List each of the main functions implemented by this module, with a phrase or sentence description of each.
@@ -229,7 +243,7 @@ The grid module ultimately stores and maintains the game map itself, containing 
 
 ### Major data structures
 
-#### Hashtable
+#### Hashtable 
 
 A data structure `hashtable` will be used to store the locations and amounts of gold piles across the map. The key would in this case be an index in the map string, which would be a spot on the map, and the item would an amount of gold stored as an int.
 
