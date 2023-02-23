@@ -106,6 +106,83 @@ The server will run as follows:
 
 ## XYZ module (remove this line after adding all modules)
 
+## Player
+
+The player module aims to collect and manage the information of all players. 
+
+It mainly contains the following:
+```c
+struct Player {
+	int player_position; 
+	char* player_name; 
+	int player_amountOfGold; 
+}; 
+```
+
+1. `player_position` is the index of the grid string to represent the position of current player. For example: `grid_string[index]`.
+
+2. `player_name` is the string indicating the player's name.
+
+3. `player_amountOfGold` is an integer indicating the amount of gold found by current player. Every time a player finds a gold, we should update its value.
+
+The functions it contains are listed below.
+
+### Functional decomposition
+
+#### `player_getName`
+
+The definition of this function is `char* player_getName();`. It returns the name of the current player. 
+
+#### `player_getPosition`
+
+The definition of this function is `int player_getPosition();`. It returns an integer, as an index of the string, to represent the position of current player. 
+
+#### `player_getGold`
+
+The definition of this function is `int player_getGold();`. It returns the amount of golds found by the current player. 
+
+#### `player_move`
+
+The definition of this function is `bool player_move(char k);`. It returns `true` when the input character `k` is valid, and vice versa.
+
+
+### Pseudo code for logic/algorithmic flow
+
+#### `player_getName`
+
+```c
+	return Player->player_name; 
+```
+
+#### `player_getPosition`
+
+```c
+	return Player->player_position; 
+```
+
+#### `player_getGold`
+
+```c
+	return Player->player_amountOfGold; 
+```
+
+#### `player_move` 
+
+```c
+	if input char is not valid:
+		return false; 
+	else, parse the char:
+		if new position is not accessable (e.g. wall, spaces):
+			return true; 
+		else: 
+			update the player's position
+			return true; 
+```
+
+### Major data structures
+
+We only need a string to represent player's name and an integer for player's position, there's no data structure in this module. 
+
 ## Grid
 
 The grid module ultimately stores and maintains the game map itself, containing methods allowing for easy access and updates to information in the map. 
