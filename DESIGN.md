@@ -192,9 +192,9 @@ The grid module ultimately stores and maintains the game map itself, containing 
 
 ### Functional decomposition
 
-* grid_init - reads a map into a string and returns a grid_t structure with the string, and the width and height of the map.
-* grid_placeGold - takes the grid and the gold constants and returns a hashmap of gold (where the index to a point in the string is the key, and the amount of gold is the item).
-* grid_getGoldLeft - return the amount of gold left to claim on the map.
+* `grid_init` - reads a map into a string and returns a grid_t structure with the string, and the width and height of the map.
+* `grid_placeGold` - takes the grid and the gold constants and returns a hashmap of gold (where the index to a point in the string is the key, and the amount of gold is the item).
+* `grid_getGoldLeft` - return the amount of gold left to claim on the map.
 
 > List each of the main functions implemented by this module, with a phrase or sentence description of each.
 
