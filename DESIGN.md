@@ -116,9 +116,17 @@ Main:
 	clean up
 
 parseArgs: 
+	ensure that the mapFile is readable
+	if there is a seed, save it
+
 initializeGame:
+	load the grid from the mapFile
+	create the player bag, 
+	initialize the player struct
 gameOver: 
+	send the quit message to all clients, along with the reason
 handleTimeout:
+	if the given amount of time passes without a message, close the server
 handleMessage:
 	if the message is PLAY
 		create a new player struct, initialize its values, and add it to the bag
@@ -134,10 +142,10 @@ handleMessage:
 		
 		change the players mode to spectate
 		send them the whole display
-	if the message is key
+	if the message is KEY
 		if the message is from a player
 			if it is a move key
-				move the player
+				move the player (will use helper functions)
 				send each client their display (with visibility)
 				if the player got gold too
 					if that is the max amount of gold, quit the game
@@ -145,18 +153,23 @@ handleMessage:
 			if it is an invalid key
 				send an error message, ignore the keystroke
 		if the message is from a spectator
+			make sure it's q 
+			quit 
 	if all the gold was collected, quit the game
 	send the updated display message to all clients
 
 
 ### Major data structures
 
-> Describe each major data structure in this program: what information does it represent, how does it represent the data, and what are its members.
-> This description should be independent of the programming language.
-> Mention, but do not describe, data structures implemented by other modules (such as the new modules you detail below, or any libcs50 data structures you plan to use).
+#### Hashtable 
+
+A data structure `hashtable` will be used to store the locations and amounts of gold piles across the map. The key would in this case be an index in the map string, which would be a spot on the map, and the item would an amount of gold stored as an int.
+
+#### Bag
+
+A data structure `bag` will be used to store the players of the game. The key is the name of the player that the client joins with, and the item is a `player_t` struct storing position, the name, and the amount of gold
 
 ---
-
 ## Player
 
 The player module aims to collect and manage the information of all players. 
@@ -164,6 +177,7 @@ The player module aims to collect and manage the information of all players.
 It mainly contains the following:
 ```c
 struct Player {
+	int player_address;
 	int player_position; 
 	char* player_name; 
 	int player_amountOfGold; 
@@ -171,13 +185,15 @@ struct Player {
 }; 
 ```
 
-1. `player_position` is the index of the grid string to represent the position of current player. For example: `grid_string[index]`.
+1. `player_address` is the player's client address.
 
-2. `player_name` is the string indicating the player's name.
+2. `player_position` is the index of the grid string to represent the position of current player. For example: `grid_string[index]`.
 
-3. `player_amountOfGold` is an integer indicating the amount of gold found by current player. Every time a player finds a gold, we should update its value.
+3. `player_name` is the string indicating the player's name.
 
-4. `player_seen` is a string indicating the positions that this player has aleady seen. It should have the same length as the total map.
+4. `player_amountOfGold` is an integer indicating the amount of gold found by current player. Every time a player finds a gold, we should update its value.
+
+5. `player_seen` is a string indicating the positions that this player has aleady seen. It should have the same length as the total map.
 
 The functions it contains are listed below.
 
@@ -259,17 +275,11 @@ struct Grid {
 }; 
 ```
 
-> List and briefly describe any modules that comprise your client, other than the main module.
- 
-> Repeat this section for each module that is included in either the client or server.
-
 ### Functional decomposition
 
 * `grid_init` - reads a map into a string and returns a grid_t structure with the string, and the width and height of the map.
 * `grid_placeGold` - takes the grid and the gold constants and returns a hashtable of gold (where the index to a point in the string is the key, and the amount of gold is the item).
 * `grid_getGoldLeft` - return the amount of gold left to claim on the map.
-
-> List each of the main functions implemented by this module, with a phrase or sentence description of each.
 
 ### Pseudo code for logic/algorithmic flow
 
@@ -297,18 +307,3 @@ struct Grid {
 	return gridStruct->goldTotalLeft
 ```
 
-> For any non-trivial function, add a level-4 #### header and provide tab-indented pseudocode.
-> This pseudocode should be independent of the programming language.
-
-### Major data structures
-
-#### Hashtable 
-
-A data structure `hashtable` will be used to store the locations and amounts of gold piles across the map. The key would in this case be an index in the map string, which would be a spot on the map, and the item would an amount of gold stored as an int.
-
-#### Bag
-
-A data structure `bag` will be used to store the players of the game. The key is the name of the player that the client joins with, and the item is a `player_t` struct storing position, the name, and the amount of gold
-
-> Describe each major data structure in this module: what information does it represent, how does it represent the data, and what are its members.
-> This description should be independent of the programming language.
