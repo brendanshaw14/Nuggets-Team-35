@@ -102,7 +102,6 @@ The server will run as follows:
 
 #### main
 
-`main`:
 
 	execute from a command line per the requirement spec
 	parse the command line, validate parameters
@@ -115,14 +114,12 @@ The server will run as follows:
 
 #### parseArgs
 
-`parseArgs`: 
 
 	ensure that the mapFile is readable
 	if there is a seed, save it
 
 #### initializeGame
 
-`initializeGame`:
 
 	load the grid from the mapFile, create a string to represent the grid
 	create the player hashtable 
@@ -130,19 +127,16 @@ The server will run as follows:
 
 #### gameOver
 
-`gameOver`: 
 
 	send the quit message to all clients, along with the reason
 
 #### handleTimeout
 
-`handleTimeout`:
 
 	if the given amount of time passes without a message, close the server
 
 #### handleMessage
 
-`handleMessage`:
 
 	if the message is PLAY
 		create a new Player struct, initialize its values, and add it to the hashtable
@@ -321,3 +315,15 @@ struct Grid {
 	return gridStruct->goldTotalLeft
 ```
 
+## Testing Plan
+
+Current testing plan is not in detailed, but in a high-level way.
+
+1. Test when the number of players exceeds the maximum range. 
+2. Test when the length of player's name exceeds the maximum range.
+3. Test when the input key is invalid.
+4. Test when the player is reaching the boundary of the map.
+5. Test when the player is moving (toward all of the 8 directions).
+6. Test when the total amount of gold found reaches the maximum.
+7. Test when the user quits the game.
+8. Test the visibility display of each player and the spectator.
