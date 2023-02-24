@@ -22,12 +22,12 @@ bool handleInput(void* arg);
 */
 int main(const int argc, const char* argv[]){
     parseArgs(argc, argv);
-    ////initialize the message stream
-    //message_init(stderr);
-    ////loop through messages
-    //message_loop(NULL, 100, handleTimeout, handleInput, handleMessage);
-    ////end the message stream
-    //message_done();
+    //initialize the message stream
+    message_init(stderr);
+    //loop through messages
+    message_loop(NULL, 100, handleTimeout, handleInput, handleMessage);
+    //end the message stream
+    message_done();
 
     return 0;
 }
