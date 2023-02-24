@@ -6,7 +6,7 @@ Team Members: Ming Cheng, Romeo Myrthil, Brendan Shaw
 
 
 According to the [Requirements Spec](REQUIREMENTS.md), the Nuggets game requires two standalone programs: a client and a server.
-Our design also includes `player` and `grid` modules.
+Our design also includes a `Player` and a `Grid` modules.
 We describe each program and module separately.
 We do not describe the `support` library nor the modules that enable features that go beyond the spec.
 We avoid repeating information that is provided in the requirements spec.
@@ -15,7 +15,7 @@ We avoid repeating information that is provided in the requirements spec.
 
 ### User interface
 
-Because we have only three group members, we will be using the `client` executable given to us in the `shared` library instead of writing out own, which takes two three arguments: the 
+Because we have only three group members, we will be using the `client` executable given to us in the `shared` library instead of writing out own, which takes two three arguments: 
 
  > Example: ./client hostname port [playername] 
 
@@ -64,26 +64,24 @@ We anticipate only the server port and error messages to be written to stdout.
 We anticipate all messages received and sent by the server will be written to a log file. 
 
 ### Functional decomposition into modules
+
 We anticipate three main methods will be used in the server module to handle arguments, starting the game, and ending the game:
-* parseArgs- handles and verifies arguments
-* initializeGame- configures the `game` struct and loads the grid
-* gameOver- informs all clients that the game has ended
+* `parseArgs`- handles and verifies arguments
+* `initializeGame`- configures the `Game` struct and loads the grid
+* `gameOver`- informs all clients that the game has ended
 
 Three other helper functions will also be written within server to pass to the `message_loop` method, in order to handle timeout and the messages themselves. 
-*handleTimeout- ends the message loop after a certain amount of time 
-*handleStdout- handles input from stdin- we are currently not sure if we will use this. 
-*handleMessage- processes messages from the client and handles them accordingly.
+
+* `handleTimeout`- ends the message loop after a certain amount of time.
+* `handleStdout`- handles input from stdin.
+* `handleMessage`- processes messages from the client and handles them accordingly.
 
 
-We also anticipate the use of two helper modules for our server, `grid` and `player`. 
-* Grid- stores the current map itself and any other necessary information, such as the map parameters and the players in the game. 
-* Player- represents a client in the game and is used by the server and grid for easy access to their information. 
+We also anticipate the use of two helper modules for our server, `Grid` and `Player`. 
+* `Grid`- stores the current map itself and any other necessary information, such as the map parameters and all players information in the game. 
+* `Player`- represents a client in the game and is used by the server and grid for easy access to their information. 
 
 ### Pseudo code for logic/algorithmic flow
-
-> For each function write pseudocode indented by a tab, which in Markdown will cause it to be rendered in literal form (like a code block).
-> Much easier than writing as a bulleted list!
-> For example:
 
 The server will run as follows:
 
@@ -102,9 +100,10 @@ The server will run as follows:
 	clean up
 
 
-> Then briefly describe each of the major functions, perhaps with level-4 #### headers.
+#### main
 
-Main:
+`main`:
+
 	execute from a command line per the requirement spec
 	parse the command line, validate parameters
 	call initializeGame() to set up data structures
@@ -114,31 +113,48 @@ Main:
 	call gameOver() to inform all clients the game has ended
 	clean up
 
-parseArgs: 
+#### parseArgs
+
+`parseArgs`: 
+
 	ensure that the mapFile is readable
 	if there is a seed, save it
 
-initializeGame:
-	load the grid from the mapFile
-	create the player hashtable, 
+#### initializeGame
+
+`initializeGame`:
+
+	load the grid from the mapFile, create a string to represent the grid
+	create the player hashtable 
 	initialize the player struct
-gameOver: 
+
+#### gameOver
+
+`gameOver`: 
+
 	send the quit message to all clients, along with the reason
-handleTimeout:
+
+#### handleTimeout
+
+`handleTimeout`:
+
 	if the given amount of time passes without a message, close the server
-handleMessage:
+
+#### handleMessage
+
+`handleMessage`:
+
 	if the message is PLAY
-		create a new player struct, initialize its values, and add it to the hashtable
+		create a new Player struct, initialize its values, and add it to the hashtable
 		make sure the player can join and that their name is valid
-		add the player to the grid 
+		set the player's position randomly and add the player to the grid 
 		store their name, send the OK <L> message to the client
 		send the GRID message to send nrows and ncolumns
 	if the message is SPECTATE
 		if there is already a spectator
 			remove the current spectator
-			create a new player struct, initialize its values, add it to the hashtable
-			store their name, send the 
-		
+			create a new Player struct, initialize its values, add it to the hashtable
+			store their name, send the message to the client
 		change the players mode to spectate
 		send them the whole display
 	if the message is KEY
@@ -147,6 +163,7 @@ handleMessage:
 				move the player (will use helper functions)
 				send each client their display (with visibility)
 				if the player got gold too
+					update the amount of gold that this player has found
 					if that is the max amount of gold, quit the game
 					otherwise send the GOLD message to all clients (including updated numbers for spectators)
 			if it is an invalid key
