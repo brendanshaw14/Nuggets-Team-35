@@ -72,7 +72,9 @@ We anticipate three main methods will be used in the server module to handle arg
 Three other helper functions will also be written within server to pass to the `message_loop` method, in order to handle timeout and the messages themselves. 
 *handleTimeout- ends the message loop after a certain amount of time 
 *handleStdout- handles input from stdin- we are currently not sure if we will use this. 
-*handleMessage- processes messages from the client and handles them accordingly. 
+*handleMessage- processes messages from the client and handles them accordingly.
+
+We will also likely need helper functions for 
 
 We also anticipate the use of two helper modules for our server, `grid` and `player`. 
 * Grid- stores the current map itself and any other necessary information, such as the map parameters and the players in the game. 
@@ -96,25 +98,7 @@ The server will run as follows:
 	print the port number on which we wait
 	call message_loop(), to await clients, passing it our helper functions, and wait for messages
 	for each message: 
-		if the message is PLAY
-			create a new player struct, initialize its values, and add it to the bag
-			make sure the player can join and that their name is valid
-			add the player to the grid 
-			store their name, send the OK <L> message to the client
-			send the GRID message to send nrows and ncolumns
-		if the message is SPECTATE
-			change the players mode to spectate
-			send them the new display
-		if the message is key
-			if it is a move key
-				move the player
-				send each client their display (with visibility)
-				if the player got gold too
-					if that is the max amount of gold, quit the game
-					otherwise send the GOLD message to all clients
-		if all the gold was collected, quit the game
-		send the updated display message to all clients
-
+		call message handle (see below)	
 	call gameOver() to inform all clients the game has ended
 	clean up
 
@@ -135,7 +119,36 @@ parseArgs:
 initializeGame:
 gameOver: 
 handleTimeout:
-handleMessage: 
+handleMessage:
+	if the message is PLAY
+		create a new player struct, initialize its values, and add it to the bag
+		make sure the player can join and that their name is valid
+		add the player to the grid 
+		store their name, send the OK <L> message to the client
+		send the GRID message to send nrows and ncolumns
+	if the message is SPECTATE
+		if there is already a spectator
+			remove the current spectator
+			create a new player struct, initialize its values, add it to the bag
+			store their name, send the 
+		
+		change the players mode to spectate
+		send them the whole display
+	if the message is key
+		if the message is from a player
+			if it is a move key
+				move the player
+				send each client their display (with visibility)
+				if the player got gold too
+					if that is the max amount of gold, quit the game
+					otherwise send the GOLD message to all clients (including updated numbers for spectators)
+			if it is an invalid key
+				send an error message, ignore the keystroke
+		if the message is from a spectator
+	if all the gold was collected, quit the game
+	send the updated display message to all clients
+
+
 ### Major data structures
 
 > Describe each major data structure in this program: what information does it represent, how does it represent the data, and what are its members.
@@ -194,26 +207,15 @@ The definition of this function is `void player_getVisibility(char* player_seen,
 ### Pseudo code for logic/algorithmic flow
 
 #### player_getName
-
-```c
 	return Player->player_name; 
-```
 
 #### player_getPosition
-
-```c
 	return Player->player_position; 
-```
 
 #### player_getGold
-
-```c
 	return Player->player_amountOfGold; 
-```
 
 #### player_move
-
-```c
 	if input char is not valid:
 		return false; 
 	else, parse the char:
@@ -222,7 +224,6 @@ The definition of this function is `void player_getVisibility(char* player_seen,
 		else: 
 			update the player's position
 			return true; 
-```
 
 
 
