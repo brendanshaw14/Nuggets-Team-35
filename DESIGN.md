@@ -98,11 +98,20 @@ The server will run as follows:
 	for each message: 
 		if the message is PLAY
 			create a new player struct, initialize its values, and add it to the bag
+			make sure the player can join and that their name is valid
 			add the player to the grid 
+			store their name, send the OK <L> message to the client
 			send the GRID message to send nrows and ncolumns
 		if the message is SPECTATE
 			change the players mode to spectate
 			send them the new display
+		if the message is key
+			if it is a move key
+				move the player
+				send each client their display (with visibility)
+				if the player got gold too
+					if that is the max amount of gold, quit the game
+					otherwise send the GOLD message to all clients
 		if all the gold was collected, quit the game
 		send the updated display message to all clients
 
