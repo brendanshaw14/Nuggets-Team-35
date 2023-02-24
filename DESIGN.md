@@ -4,7 +4,6 @@
 
 Team Members: Ming Cheng, Romeo Myrthil, Brendan Shaw
 
-> This **template** includes some gray text meant to explain how to use the template; delete all of them in your document!
 
 According to the [Requirements Spec](REQUIREMENTS.md), the Nuggets game requires two standalone programs: a client and a server.
 Our design also includes `player` and `grid` modules.
@@ -24,6 +23,8 @@ See the requirements spec for both the command-line and interactive UI.
 
 ### Inputs and outputs- Keystrokes and Display
 
+Pulled from requirements spec for reference: 
+
 * `Q` : quit- turns off display and exits the client. 
 * `h` : move left- moves the player's location and icon to the left, if possible.  
 * `l` : move right- moves the player's location and icon to the right, if possible.  
@@ -34,11 +35,6 @@ See the requirements spec for both the command-line and interactive UI.
 * `b` : move diagonally down and left- moves the player's location and icon diagonally and to the left, if possible.  
 * `n` : move diagonally down and left- moves the player's location and icon diagonally and to the left, if possible.  
 
-NEED TO INSERT LOG INFO HERE
-> Briefly describe the inputs (keystrokes) and outputs (display).
-> If you write to log files, or log to stderr, describe that here.
-> Command-line arguments are not 'input'.
-
 ### Functional decomposition into modules
 See above: client was given to us.
 
@@ -46,7 +42,6 @@ See above: client was given to us.
 See above: client was given to us.
 
 ### Major data structures
-
 See above: client was given to us.
 
 ---
@@ -64,17 +59,24 @@ There is no interaction with the user.
 
 The `server` takes a `.txt` file containing a _valid_ nuggets map specified by the user. This map will then be loaded by the grid module for use by the server and client.
 
-All messages will be written to a log file. 
+We anticipate only the server port and error messages to be written to stdout. 
 
-> Briefly describe the inputs (map file) and outputs (to terminal).
-> If you write to log files, or log to stderr, describe that here.
-> Command-line arguments are not 'input'.
+We anticipate all messages received and sent by the server will be written to a log file. 
 
 ### Functional decomposition into modules
+We anticipate three main methods will be used in the server module to handle arguments, starting the game, and ending the game:
 * parseArgs- handles and verifies arguments
 * initializeGame- configures the `game` struct and loads the grid
 * gameOver- informs all clients that the game has ended
-> List and briefly describe any modules that comprise your server, other than the main module.
+
+Three other helper functions will also be written within server to pass to the `message_loop` method, in order to handle timeout and the messages themselves. 
+*handleTimeout- ends the message loop after a certain amount of time 
+*handleStdout- handles input from stdin- we are currently not sure if we will use this. 
+*handleMessage- processes messages from the client and handles them accordingly. 
+
+We also anticipate the use of two helper modules for our server, `grid` and `player`. 
+* Grid- stores the current map itself and any other necessary information, such as the map parameters and the players in the game. 
+* Player- represents a client in the game and is used by the server and grid for easy access to their information. 
 
 ### Pseudo code for logic/algorithmic flow
 
@@ -86,16 +88,45 @@ The server will run as follows:
 
 	execute from a command line per the requirement spec
 	parse the command line, validate parameters
-	call initializeGame() to set up data structures
-	initialize the 'message' module
+	call initializeGame() to set up data structures	
+		create a bag of players
+		load the map into a grid
+		distribute gold randomly into the map
+	call message_init to initialize the 'message' module
 	print the port number on which we wait
-	call message_loop(), to await clients
+	call message_loop(), to await clients, passing it our helper functions, and wait for messages
+	for each message: 
+		if the message is PLAY
+			create a new player struct, initialize its values, and add it to the bag
+			add the player to the grid 
+			send the GRID message to send nrows and ncolumns
+		if the message is SPECTATE
+			change the players mode to spectate
+			send them the new display
+		if all the gold was collected, quit the game
+		send the updated display message to all clients
+
 	call gameOver() to inform all clients the game has ended
 	clean up
 
 
 > Then briefly describe each of the major functions, perhaps with level-4 #### headers.
 
+Main:
+	execute from a command line per the requirement spec
+	parse the command line, validate parameters
+	call initializeGame() to set up data structures
+	initialize the 'message' module
+	print the port number on which we wait
+	call message_loop(), to await clients, passing it our helper functions
+	call gameOver() to inform all clients the game has ended
+	clean up
+
+parseArgs: 
+initializeGame:
+gameOver: 
+handleTimeout:
+handleMessage: 
 ### Major data structures
 
 > Describe each major data structure in this program: what information does it represent, how does it represent the data, and what are its members.
@@ -103,8 +134,6 @@ The server will run as follows:
 > Mention, but do not describe, data structures implemented by other modules (such as the new modules you detail below, or any libcs50 data structures you plan to use).
 
 ---
-
-## XYZ module (remove this line after adding all modules)
 
 ## Player
 
