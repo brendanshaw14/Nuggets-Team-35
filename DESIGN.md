@@ -74,7 +74,6 @@ Three other helper functions will also be written within server to pass to the `
 *handleStdout- handles input from stdin- we are currently not sure if we will use this. 
 *handleMessage- processes messages from the client and handles them accordingly.
 
-We will also likely need helper functions for 
 
 We also anticipate the use of two helper modules for our server, `grid` and `player`. 
 * Grid- stores the current map itself and any other necessary information, such as the map parameters and the players in the game. 
@@ -91,7 +90,7 @@ The server will run as follows:
 	execute from a command line per the requirement spec
 	parse the command line, validate parameters
 	call initializeGame() to set up data structures	
-		create a bag of players
+		create a hashtable of players
 		load the map into a grid
 		distribute gold randomly into the map
 	call message_init to initialize the 'message' module
@@ -121,7 +120,7 @@ parseArgs:
 
 initializeGame:
 	load the grid from the mapFile
-	create the player bag, 
+	create the player hashtable, 
 	initialize the player struct
 gameOver: 
 	send the quit message to all clients, along with the reason
@@ -129,7 +128,7 @@ handleTimeout:
 	if the given amount of time passes without a message, close the server
 handleMessage:
 	if the message is PLAY
-		create a new player struct, initialize its values, and add it to the bag
+		create a new player struct, initialize its values, and add it to the hashtable
 		make sure the player can join and that their name is valid
 		add the player to the grid 
 		store their name, send the OK <L> message to the client
@@ -137,7 +136,7 @@ handleMessage:
 	if the message is SPECTATE
 		if there is already a spectator
 			remove the current spectator
-			create a new player struct, initialize its values, add it to the bag
+			create a new player struct, initialize its values, add it to the hashtable
 			store their name, send the 
 		
 		change the players mode to spectate
@@ -165,9 +164,7 @@ handleMessage:
 
 A data structure `hashtable` will be used to store the locations and amounts of gold piles across the map. The key would in this case be an index in the map string, which would be a spot on the map, and the item would an amount of gold stored as an int.
 
-#### Bag
-
-A data structure `bag` will be used to store the players of the game. The key is the name of the player that the client joins with, and the item is a `player_t` struct storing position, the name, and the amount of gold
+The `hashtable` structure will also needed to store the players information to get access to all players in the `Grid` module. It contains the items with type of `player_t` which stores the player's information.
 
 ---
 ## Player
@@ -269,7 +266,7 @@ struct Grid {
 	Int width;
 	Int height;
 	Int numPlayers;
-	bag_t* players; 
+	hashtable_t* players; 
 	int goldTotalLeft; 
 	hashtable_t* goldLocation;
 }; 
