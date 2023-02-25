@@ -6,7 +6,7 @@ See grid.h for detailed info.*/
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-//write the hashtable include here:  
+#include "../libcs50/hashtable.h"
 
 /****************global types**************/
 typedef struct grid {
