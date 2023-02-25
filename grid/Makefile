@@ -3,9 +3,9 @@
 
 # Compiler and flags
 CC = gcc
-CFLAGS=-Wall -pedantic -std=c11 -ggdb -I../suppprt -I. -L../libcs50 -lcs50-given
+CFLAGS=-Wall -pedantic -std=c11 -ggdb -I../suppprt -I. -L../libcs50 -lcs50-given 
 PROG = gridtest
-
+LIBS = ../libcs50/libcs50-given.a
 # Source files
 SRCS = grid.c gridtest.c
 
@@ -16,11 +16,14 @@ OBJS = $(SRCS:.c=.o)
 
 all: $(PROG)
 
-$(PROG): $(OBJS)
+$(PROG): $(OBJS) $(LIBS)
 	$(CC) $(CFLAGS) $^ -o $@
 
-%.o: %.c grid.h
+%.o: %.c $(LIBS) grid.h 
 	$(CC) $(CFLAGS) -c $< -o $@
+
+test: 
+	./gridtest ../maps/main.txt
 
 clean:
 	rm -f $(PROG) $(OBJS)
