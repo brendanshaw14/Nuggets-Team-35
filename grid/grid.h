@@ -14,4 +14,4 @@ CS50- Winter 2023*/
 save the number of rows and columns
 Loop through each line of the map
 */
-bool grid_init(FILE* inputMap);
+grid_t* grid_init(FILE* inputMap);

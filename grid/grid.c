@@ -13,17 +13,32 @@ See grid.h for detailed info.*/
 
 /****************global types**************/
 typedef struct grid {
-    char* grid;
+    char* gridString;
     hashtable_t* playerTable;
     int numRows;
     int numColumns;
 } grid_t;
 
 //initialize a grid given an input map file
-bool grid_init(FILE* inputMap){
-    grid_t* grid = mem_malloc(sizeof(grid_t));
-    grid -> numRows = file_numLines(inputMap);
-    printf("Num rows: %d", grid -> numRows);
-    return true;
+grid_t* grid_init(FILE* inputMap){
+    //initialize the new grid structs
+    grid_t* grid = mem_malloc(sizeof(grid_t)); //make a new grid
+    grid -> playerTable = hashtable_new(26); //make a player table with 26 spots
+    //get row and column parameters
+    grid -> numRows = file_numLines(inputMap); //set the number of rows
+    char* firstLine = file_readLine(inputMap); 
+    grid -> numColumns = strlen(firstLine);
+    //make the grid string!
+    grid -> gridString = mem_malloc((grid -> numColumns + 1) * grid -> numRows + 1); 
+    char* nextLine = mem_malloc(grid -> numColumns + 1);
+    //put the first line in    
+    strcat(firstLine, "\n");
+    strcat(grid -> gridString, firstLine);
+    //read through the lines of the map, adding the null terminator and pasting them into the gridString
+    while ((nextLine = file_readLine(inputMap)) != NULL){
+        strcat(nextLine, "\n");
+        strcat(grid -> gridString, nextLine);
+    }
+    return grid;
 }
 

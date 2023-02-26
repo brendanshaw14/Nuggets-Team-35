@@ -17,6 +17,7 @@ int main(const int argc, const char* argv[]){
         fprintf(stderr, "Invalid Grid Test Map");
         exit(1);
     }
-    grid_init(fp);
+    grid_t* grid = grid_init(fp);
+    printf("%s", grid -> gridString);
     return 0;
 }
