@@ -70,6 +70,7 @@ bool player_move(player_t* player, char k, int width, int height, char* map, dou
         if (moveToNewPosition(player, player->player_position - 1, map)) {
             // update the "seen" string
             player_updateVisibility(player, map, width, radius); 
+            // TODO: if new position is gold, update player_amountOfGold, better define another function to do this
         }
         break;
     case 'l':
