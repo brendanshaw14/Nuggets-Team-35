@@ -6,6 +6,8 @@ See player.h for detailed info.*/
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h> 
+#include <string.h>
+#include <math.h>
 
 typedef struct player {
     int player_address; 
@@ -17,9 +19,10 @@ typedef struct player {
 
 static bool checkValidPosition(int position, char* map);
 static int isReachBound(int position, int width, int height, char bound);  
-static void moveToNewPosition(player_t* player, int newPosition, char* map); 
-
-
+static bool moveToNewPosition(player_t* player, int newPosition, char* map); 
+static int getXAxis(int position, int width); 
+static int getYAxis(int position, int width); 
+static double computeDistance(int x1, int y1, int x2, int y2); 
 
 char* player_getName(player_t* player) {
     return player->player_name; 
@@ -33,7 +36,26 @@ int player_getGold(player_t* player) {
     return player->player_amountOfGold; 
 } 
 
-bool player_move(player_t* player, char k, int width, int height, char* map) {
+char* player_getVisibility(player_t* player) {
+    return player->player_seen; 
+}
+
+void player_updateVisibility(player_t* player, char* map, int width, double radius) {
+    int playerXCoord = getXAxis(player->player_position, width), playerYCoord = getYAxis(player->player_position, width); 
+    for (int position = 0; position < strlen(map); position++) {
+        // get x and y coordinates 
+        int currXCoord = getXAxis(position, width), currYCoord = getYAxis(position, width); 
+        // compute distance
+        double distance = computeDistance(currXCoord, currYCoord, playerXCoord, playerYCoord); 
+        if (distance < pow(radius, 2) && player->player_seen[position] == ' ') {
+            // if current position is within the circle and it's not been seen yet
+            // set it to map[position]
+            player->player_seen[position] = map[position]; 
+        }
+    }
+}
+
+bool player_move(player_t* player, char k, int width, int height, char* map, double radius) {
     // TODO: add invalid check for k
     // ....
     switch (k)
@@ -45,7 +67,10 @@ bool player_move(player_t* player, char k, int width, int height, char* map) {
             return true; 
         } 
         // move to new position
-        moveToNewPosition(player, player->player_position - 1, map); 
+        if (moveToNewPosition(player, player->player_position - 1, map)) {
+            // update the "seen" string
+            player_updateVisibility(player, map, width, radius); 
+        }
         break;
     case 'l':
         // move right
@@ -54,7 +79,10 @@ bool player_move(player_t* player, char k, int width, int height, char* map) {
             return true; 
         }
         // move to new position
-        moveToNewPosition(player, player->player_position + 1, map); 
+        if (moveToNewPosition(player, player->player_position + 1, map)) {
+            // update the "seen" string
+            player_updateVisibility(player, map, width, radius); 
+        } 
         break; 
     case 'j':
         // move down
@@ -63,7 +91,10 @@ bool player_move(player_t* player, char k, int width, int height, char* map) {
             return true; 
         }
         // move to new position
-        moveToNewPosition(player, player->player_position + width, map); 
+        if (moveToNewPosition(player, player->player_position + width, map)) {
+            // update the "seen" string
+            player_updateVisibility(player, map, width, radius); 
+        }
         break; 
     case 'k':
         // move up
@@ -72,7 +103,10 @@ bool player_move(player_t* player, char k, int width, int height, char* map) {
             return true; 
         }
         // move to new position
-        moveToNewPosition(player, player->player_position - width, map); 
+        if (moveToNewPosition(player, player->player_position - width, map)) {
+            // update the "seen" string
+            player_updateVisibility(player, map, width, radius);
+        }
         break; 
     case 'y': 
         // move diagonally up and left
@@ -82,7 +116,10 @@ bool player_move(player_t* player, char k, int width, int height, char* map) {
                 return true; 
         } 
         // move to new position
-        moveToNewPosition(player, player->player_position - width - 1, map); 
+        if (moveToNewPosition(player, player->player_position - width - 1, map)) {
+            // update the "seen" string
+            player_updateVisibility(player, map, width, radius);
+        }
         break; 
     case 'u':
         // move diagonally up and right
@@ -92,7 +129,10 @@ bool player_move(player_t* player, char k, int width, int height, char* map) {
                 return true; 
         } 
         // move to new position
-        moveToNewPosition(player, player->player_position - width + 1, map); 
+        if (moveToNewPosition(player, player->player_position - width + 1, map)) {
+            // update the "seen" string
+            player_updateVisibility(player, map, width, radius);
+        }
         break; 
     case 'b': 
         // move diagonally down and left
@@ -102,7 +142,10 @@ bool player_move(player_t* player, char k, int width, int height, char* map) {
                 return true; 
         } 
         // move to new position
-        moveToNewPosition(player, player->player_position + width - 1, map); 
+        if (moveToNewPosition(player, player->player_position + width - 1, map)) {
+            // update the "seen" string
+            player_updateVisibility(player, map, width, radius);
+        }
         break; 
     case 'n':
         // move diagonally down and right
@@ -112,12 +155,29 @@ bool player_move(player_t* player, char k, int width, int height, char* map) {
                 return true; 
         } 
         // move to new position
-        moveToNewPosition(player, player->player_position + width + 1, map); 
+        if (moveToNewPosition(player, player->player_position + width + 1, map)) {
+            // update the "seen" string
+            player_updateVisibility(player, map, width, radius);
+        }
         break; 
     default:
         break;
     }
     return true; 
+}
+
+static int getXAxis(int position, int width) {
+    return position / width; 
+}
+
+static int getYAxis(int position, int width) {
+    return position % width; 
+}
+
+// We define a function here in case that we can use different methods to compute distance
+// Currently is: (x1 - x2)^2 + (y1 - y2)^2 
+static double computeDistance(int x1, int y1, int x2, int y2) {
+    return pow(x1 - x2, 2) + pow(y1 - y2, 2); 
 }
 
 static int isReachBound(int position, int width, int height, char bound) {
@@ -163,13 +223,14 @@ static int isReachBound(int position, int width, int height, char bound) {
     return -1; 
 }
 
-static void moveToNewPosition(player_t*player, int newPosition, char* map) {
+static bool moveToNewPosition(player_t*player, int newPosition, char* map) {
     // if new position is reachable, then move to it
     // otherwise, do nothing
     if (checkValidPosition(newPosition, map)) {
         player->player_position = newPosition; 
-        // TODO: change the "seen" string, better to define another function
+        return true; 
     }
+    return false; 
 }
 
 static bool checkValidPosition(int position, char* map) {
