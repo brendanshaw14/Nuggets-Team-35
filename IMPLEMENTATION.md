@@ -83,6 +83,10 @@ static int parseArgs(const int argc, char* argv[]);
 	else
 		seed the random-number generator with getpid()
 
+### handling messages (temporary title, dont know what to call it yet)
+
+handling messages stuff
+
 ---
 
 ## XYZ module
