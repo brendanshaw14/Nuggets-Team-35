@@ -2,8 +2,8 @@
 Authors: Brendan Shaw, Romeo Myrthil, Ming Cheng
 CS50- Winter 2023*/
 
-#ifndef _PLAYER_H
-#define _PLAYER_H
+#ifndef _PLAYER_H_
+#define _PLAYER_H_
 
 // includes
 #include <stdio.h>
