@@ -3,14 +3,14 @@
 
 # Compiler and flags
 CC = gcc
-CFLAGS=-Wall -pedantic -std=c11 -ggdb -I../suppprt -I. -L../libcs50 -lcs50-given 
+CFLAGS=-Wall -pedantic -std=c11 -ggdb -I../suppprt -I../libcs50 -I. -L../libcs50 -lcs50-given 
 PROG = gridtest
 LIBS = ../libcs50/libcs50-given.a
 # Source files
 SRCS = grid.c gridtest.c
 
 # Object files
-OBJS = $(SRCS:.c=.o)
+OBJS = grid.o gridtest.o
 
 .PHONY: all clean
 

@@ -8,6 +8,22 @@ CS50- Winter 2023*/
 #include <stdlib.h>
 #include <string.h>
 #include "../libcs50/hashtable.h"
+#include "../libcs50/counters.h"
+
+
+/****************global types**************/
+typedef struct grid grid_t;  // opaque to users of the module
+
+/****************global types**************/
+typedef struct grid {
+    char* gridString;
+    hashtable_t* playerTable;
+    counters_t* goldTable;
+    int numRows;
+    int numColumns;
+    int numPlayers;
+    int goldRemaining;
+} grid_t;
 
 /***********grid_init*************/
 /* Initializes a new grid given an input map file
