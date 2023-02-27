@@ -24,6 +24,25 @@ static int getXAxis(int position, int width);
 static int getYAxis(int position, int width); 
 static double computeDistance(int x1, int y1, int x2, int y2); 
 
+player_t* player_init(char* map) {
+    player_t* player = malloc(sizeof(player_t)); 
+    player->player_address = -1; 
+    player->player_position = -1; 
+    player->player_name = ""; 
+    player->player_amountOfGold = 0; 
+    player->player_seen = malloc(strlen(map)); 
+    // initialize player_seen string
+    for (int i = 0; i < strlen(map); i++) {
+        if (map[i] == '\n') {
+            printf("hahahhahahahah"); 
+            player->player_seen[i] = '\n'; 
+        } else {
+            player->player_seen[i] = '!'; 
+        }
+    }
+    return player; 
+}
+
 char* player_getName(player_t* player) {
     return player->player_name; 
 }
@@ -47,12 +66,13 @@ void player_updateVisibility(player_t* player, char* map, int width, double radi
         int currXCoord = getXAxis(position, width), currYCoord = getYAxis(position, width); 
         // compute distance
         double distance = computeDistance(currXCoord, currYCoord, playerXCoord, playerYCoord); 
-        if (distance < pow(radius, 2) && player->player_seen[position] == ' ') {
+        if (distance < pow(radius, 2) && player->player_seen[position] == '!') {
             // if current position is within the circle and it's not been seen yet
             // set it to map[position]
             player->player_seen[position] = map[position]; 
         }
     }
+    player->player_seen[player->player_position] = '*'; 
 }
 
 bool player_move(player_t* player, char k, int width, int height, char* map, double radius) {
@@ -79,6 +99,7 @@ bool player_move(player_t* player, char k, int width, int height, char* map, dou
         if (isReachBound(player->player_position, width, height, 'r') == 1) {
             return true; 
         }
+        printf("Begin to move ....\n"); 
         // move to new position
         if (moveToNewPosition(player, player->player_position + 1, map)) {
             // update the "seen" string
@@ -228,6 +249,8 @@ static bool moveToNewPosition(player_t*player, int newPosition, char* map) {
     // if new position is reachable, then move to it
     // otherwise, do nothing
     if (checkValidPosition(newPosition, map)) {
+        // reset the originl position because we're begin to move
+        player->player_seen[player->player_position] = '!'; 
         player->player_position = newPosition; 
         return true; 
     }

@@ -11,6 +11,16 @@ CS50- Winter 2023*/
 
 typedef struct player player_t; 
 
+typedef struct player {
+    int player_address; 
+    int player_position; 
+    char* player_name; 
+    int player_amountOfGold; 
+    char* player_seen; 
+} player_t;
+
+player_t* player_init(char* map); 
+
 char* player_getName(player_t* player);
 
 int player_getPosition(player_t* player); 
