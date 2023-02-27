@@ -1,8 +1,8 @@
 # CS50 Nuggets
 ## Implementation Spec
-### Team name, term, year
+### Team 35, Winter, 2023
 
-> This **template** includes some gray text meant to explain how to use the template; delete all of them in your document!
+Team Members: Ming Cheng, Romeo Myrthil, Brendan Shaw
 
 According to the [Requirements Spec](REQUIREMENTS.md), the Nuggets game requires two standalone programs: a client and a server.
 Our design also includes x, y, z modules.
@@ -18,35 +18,140 @@ We avoid repeating information that is provided in the requirements spec.
 
 ## Player
 
-> Teams of 3 students should delete this section.
+We implement a `Player` module to store the information of player/client. 
 
 ### Data structures
 
-> For each new data structure, describe it briefly and provide a code block listing the `struct` definition(s).
-> No need to provide `struct` for existing CS50 data structures like `hashtable`.
+We define a `Player` structure to represent a player. 
+```c
+typedef struct player {
+    int player_address; 
+    int player_position; 
+    char* player_name; 
+    int player_amountOfGold; 
+    char* player_seen; 
+} player_t;
+```
+
+Currently, a `player` structure contains the following: 
+- `player_address`: an integer representing player's address
+- `player_position`: an integer representing player's position
+- `player_name`: a string representing player's name
+- `player_amountOfGold`: an integer representing the amount of gold that current player has found
+- `player_seen`: a string representing the player's current visibility
+
 
 ### Definition of function prototypes
 
-> For function, provide a brief description and then a code block with its function prototype.
-> For example:
+```c
+player_t* player_init(char* map); 
+```
 
-A function to parse the command-line arguments, initialize the game struct, initialize the message module, and (BEYOND SPEC) initialize analytics module.
+`player_init` function is used to initialize a player.
 
 ```c
-static int parseArgs(const int argc, char* argv[]);
+char* player_getName(player_t* player); 
 ```
+
+`player_getName` function is used to get the name of the player.
+
+```c
+int player_getPosition(player_t* player); 
+```
+
+`player_getPosition` function is used to get the position of the player. 
+
+```c
+int player_getGold(player_t* player); 
+```
+
+`player_getGold` function is used to get the amount of gold found by the player. 
+
+```c
+char* player_getVisibility(player_t* player); 
+```
+
+`player_getVisibility` function is used to print the current visible map of the player.
+
+```c
+void player_updateVisibility(player_t* player, char* map, int width, double radius); 
+```
+`player_updateVisibility` function is used to update the visible range when player moves.
+
+
+```c
+bool player_move(player_t* player, char k, int width, int height, char* map, double radius);
+```
+
+`player_move` function is used to move the player (update the player's position), and calls `player_updateVisibility` function to update the visible range.
+
+
 ### Detailed pseudo code
 
-> For each function write pseudocode indented by a tab, which in Markdown will cause it to be rendered in literal form (like a code block).
-> Much easier than writing as a bulleted list!
-> For example:
+#### `player_init`:
 
-#### `parseArgs`:
+	allocate space for the structure
+	set initial value of variables in the structure
+	set the initial value of player_seen string
 
-	validate commandline
-	initialize message module
-	print assigned port number
-	decide whether spectator or player
+
+#### `player_updateVisibility`
+
+	get the current position of player
+	loop for all positions in the map:
+		for each position, compute the distance between it and player
+		if the distance is less than radius:
+			set it to be visible (map[position])
+	set the new player position to '*' to mark it's a player
+
+#### `player_move`
+
+	check the input key, if it's valid:
+		check whether current position reaches bound
+		if so: 
+			directly return true
+		else：
+			move to new position:
+				check if new position is able to move to
+				if so: 
+					update the player's position, return true
+				else:
+					return false
+			if `moveToNewPosition` returns `true`: 
+			update the player's visibility
+			update the amount of gold if new position is gold
+		return true
+	else:
+		return false
+
+#### `isReachBound`
+
+	check input char to distinguish directions
+	if 't', checking whether it's top bound:
+		check `position / width == 0`
+	if 'b', checking whether it's bottom bound:
+		check `position / width == height - 1`
+	if 'l', checking whether it's left bound:
+		check `position % width == 0`
+	if 'r', checking whether it's right bound:
+		check `position % width == width - 1`
+
+#### `moveToNewPosition`
+
+	check whether current position is valid
+	if so: 
+		reset the `player_seen`
+		update the `player_position`
+		return true
+	else:
+		return false 
+
+
+#### `checkValidPosition`
+	if current position is '.' or '#':
+		return true
+	else:
+		return false
 
 ---
 
