@@ -266,7 +266,7 @@ Makes sure that the player is in a valid position.
 	else:
 		return false
 
-#### updateVisibilities_helper
+#### `updateVisibilities_helper`
 
 A helper function for hashtable iterate, for updating every players visibility and sending it to their clients
 
@@ -275,7 +275,7 @@ A helper function for hashtable iterate, for updating every players visibility a
 	player->player_seen = that new visibility
 	message_send DISPLAY\nplayer->player_seen
 
-#### updateGoldStatus_helper
+#### `updateGoldStatus_helper`
 
 A helper function for hashtable iterate, for sending out a message about the goldStatus to every player
 
@@ -283,7 +283,7 @@ A helper function for hashtable iterate, for sending out a message about the gol
 	message_send GOLD n p r 
 	where n is the nuggets just picked up, p is players total nuggets, and r is remaining on the map
 
-#### endGame_helper
+#### `endGame_helper`
 
 A helper function for hashtable iterate, for helping each client quit the game 
 
