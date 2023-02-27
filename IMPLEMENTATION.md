@@ -148,7 +148,7 @@ Currently, a `player` structure contains the following:
 ### Definition of function prototypes
 
 ```c
-player_t* player_init(char* map); 
+player_t* player_init(char* map, int address, int init_position, char* name, bool isSpectator); 
 ```
 
 `player_init` function is used to initialize a player.
@@ -194,7 +194,7 @@ bool player_move(player_t* player, char k, int width, int height, char* map, dou
 
 #### `player_init`:
 
-Initializes a player structure, setting default values and the players name, address, and info, calls the grid_addPlayerMethod
+Initializes a player structure, setting default values and the players name, address, and info, calls the `grid_addPlayerMethod`.
 
 	allocate space for the structure
 	set initial value of variables in the structure
@@ -274,7 +274,6 @@ A helper function for hashtable iterate, for updating every players visibility a
 	update player visibility
 	player->player_seen = that new visibility
 	message_send DISPLAY\nplayer->player_seen
----
 
 #### updateGoldStatus_helper
 
@@ -309,8 +308,8 @@ typedef struct grid {
     int numPlayers;
     int goldRemaining;
 } grid_t;
->>>>>>> Stashed changes
 ```
+
 Currently, a `grid` structure contains the following: 
 - `gridString`: a string representing the entire map
 - `playerTable`: a hashtable of player objects representing the players in the game
@@ -320,13 +319,11 @@ Currently, a `grid` structure contains the following:
 - `numPlayers`: an integer representing the number of players in the game
 - `goldRemaining`: an integer representing the amount of gold left in the map
 
-<<<<<<< Updated upstream
-
 ### Definition of function prototypes
 
 #### `grid_init`- initializes a grid structure given a map file
 ```c
-####grid_init(FILE* inputMap);
+grid_t* grid_init(FILE* inputMap);
 ```
 
 #### `grid_placeGold`- places the gold piles randomly in the map
@@ -338,7 +335,6 @@ bool grid_placeGold(grid_t* grid, int minPiles, int maxPiles, int seed);
 ```c
 bool grid_addPlayer(grid_t* gid, player_t* player);
 ```
->>>>>>> Stashed changes
 ### Detailed pseudo code
 
 #### `grid_init` - loads the grid object from a map.txt file
