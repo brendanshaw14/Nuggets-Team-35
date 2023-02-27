@@ -113,7 +113,7 @@ bool player_move(player_t* player, char k, int width, int height, char* map, dou
             return true; 
         }
         // move to new position
-        if (moveToNewPosition(player, player->player_position + width, map)) {
+        if (moveToNewPosition(player, player->player_position + width + 1, map)) {
             // update the "seen" string
             player_updateVisibility(player, map, width, radius); 
         }
@@ -125,7 +125,7 @@ bool player_move(player_t* player, char k, int width, int height, char* map, dou
             return true; 
         }
         // move to new position
-        if (moveToNewPosition(player, player->player_position - width, map)) {
+        if (moveToNewPosition(player, player->player_position - width - 1, map)) {
             // update the "seen" string
             player_updateVisibility(player, map, width, radius);
         }
@@ -138,7 +138,7 @@ bool player_move(player_t* player, char k, int width, int height, char* map, dou
                 return true; 
         } 
         // move to new position
-        if (moveToNewPosition(player, player->player_position - width - 1, map)) {
+        if (moveToNewPosition(player, player->player_position - width - 2, map)) {
             // update the "seen" string
             player_updateVisibility(player, map, width, radius);
         }
@@ -151,7 +151,7 @@ bool player_move(player_t* player, char k, int width, int height, char* map, dou
                 return true; 
         } 
         // move to new position
-        if (moveToNewPosition(player, player->player_position - width + 1, map)) {
+        if (moveToNewPosition(player, player->player_position - width, map)) {
             // update the "seen" string
             player_updateVisibility(player, map, width, radius);
         }
@@ -164,7 +164,7 @@ bool player_move(player_t* player, char k, int width, int height, char* map, dou
                 return true; 
         } 
         // move to new position
-        if (moveToNewPosition(player, player->player_position + width - 1, map)) {
+        if (moveToNewPosition(player, player->player_position + width, map)) {
             // update the "seen" string
             player_updateVisibility(player, map, width, radius);
         }
@@ -177,7 +177,7 @@ bool player_move(player_t* player, char k, int width, int height, char* map, dou
                 return true; 
         } 
         // move to new position
-        if (moveToNewPosition(player, player->player_position + width + 1, map)) {
+        if (moveToNewPosition(player, player->player_position + width + 2, map)) {
             // update the "seen" string
             player_updateVisibility(player, map, width, radius);
         }
