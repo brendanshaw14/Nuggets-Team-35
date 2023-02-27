@@ -19,5 +19,7 @@ int main(const int argc, const char* argv[]){
     }
     grid_t* grid = grid_init(fp);
     printf("%s", grid -> gridString);
+    grid_placeGold(grid, 10, 30, 1);
+    printf("%s", grid -> gridString);
     return 0;
 }

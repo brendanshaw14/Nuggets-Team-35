@@ -7,6 +7,8 @@ See grid.h for detailed info.*/
 #include <stdbool.h>
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
+#include <math.h>
 #include "../libcs50/hashtable.h"
 #include "../libcs50/counters.h"
 #include "../libcs50/file.h"
@@ -52,14 +54,61 @@ grid_t* grid_init(FILE* inputMap){
     }
     return grid;
 }
-//	initialize hashtable
-	//loop while goldplaced != goldTotal
-      //get a random index in grid string
-	  //check if index is valid position
-		//get a random int newGoldPile between goldMin and goldMax
-		//if goldplaced + newGoldPile < goldTotal
-		  //insert in hashtable
-bool grid_placeGold(grid_t* grid, int maxPile, int minPile){
-    hashtable_t* goldTable = hashtable_init();
+/*	
+create a counter for the gold 
+find the min and max pieces per pile
+while not all the pieces have been added
+    add gold to the counter
+    add the gold to the map 
+    increment
+when the last piece is reached before 250, add the remaining gold to that pile
+*/
+bool grid_placeGold(grid_t* grid, int minPiles, int maxPiles, int seed){
+    counters_t* goldCounter = counters_new(); //make a counters to store the gold piles and their indexes
+    int goldPlaced = 0;
+    int pilesPlaced = 0;
+    int minPerPile = (GoldTotal/maxPiles);
+    int maxPerPile = (GoldTotal/minPiles);
+    printf("min per pile: %d", minPerPile);
+    printf("max per pile: %d", maxPerPile);
+    //loop through random indexes
+    int index;
+    char currentChar;
+    int goldInPile;
+    //set the seed
+    if (seed != 0){
+        srand(seed);
+        printf("got the seed");
+    }
+    else{
+        srand(getpid());
+    }
+    //add an approximate amount to numPiles piles
+    while (goldPlaced <= GoldTotal - maxPerPile){
+        index = rand() % (grid -> numColumns * grid -> numRows) + 1; //get a random index in the map
+        currentChar = grid -> gridString[index]; //get the character at that index
+        //if that character is valid (a room char)
+        if (currentChar == '.'){
+            goldInPile = rand() % (maxPerPile - minPerPile) + minPerPile; //amt of gold in this pile
+            counters_set(goldCounter, index, goldInPile);
+            goldPlaced += goldInPile;
+            printf("\nAdded %d gold to the pile", goldInPile);
+            pilesPlaced ++;
+            grid -> gridString[index] = '*';
+        }
+    }
+    //place the final pile
+    index = rand() % (grid -> numColumns * grid -> numRows) + 1; //get a random index in the map
+    goldInPile = GoldTotal - goldPlaced;
+    counters_set(goldCounter, index, goldInPile);
+    goldPlaced += goldInPile;
+    pilesPlaced ++;
+    printf("Number of piles: %d, Total gold: %d", pilesPlaced, goldPlaced);
     return true;
 }
+
+
+//bool grid_addPlayer(grid_t* grid, player_t* player){
+    //get the grid's hashtable
+    
+//}
