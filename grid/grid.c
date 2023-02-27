@@ -76,7 +76,7 @@ bool grid_placeGold(grid_t* grid, int minPiles, int maxPiles, int seed){
     char currentChar;
     int goldInPile;
     //set the seed
-    if (seed != 0){
+    if (seed != -1){
         srand(seed);
         printf("got the seed");
     }
@@ -98,11 +98,18 @@ bool grid_placeGold(grid_t* grid, int minPiles, int maxPiles, int seed){
         }
     }
     //place the final pile
-    index = rand() % (grid -> numColumns * grid -> numRows) + 1; //get a random index in the map
-    goldInPile = GoldTotal - goldPlaced;
-    counters_set(goldCounter, index, goldInPile);
-    goldPlaced += goldInPile;
-    pilesPlaced ++;
+    while (goldPlaced != 250){
+        index = rand() % (grid -> numColumns * grid -> numRows) + 1; //get a random index in the map
+        currentChar = grid -> gridString[index];
+        if (currentChar == '.'){
+                goldInPile = GoldTotal - goldPlaced;
+                counters_set(goldCounter, index, goldInPile);
+                goldPlaced += goldInPile;
+                printf("\nAdded %d gold to the pile", goldInPile);
+                pilesPlaced ++;
+                grid -> gridString[index] = '*';
+        }
+    }
     printf("Number of piles: %d, Total gold: %d", pilesPlaced, goldPlaced);
     return true;
 }
