@@ -17,12 +17,16 @@ typedef struct player {
     char* player_seen; 
 } player_t; 
 
+const char player_mark = '*'; 
+const char init_seen_mark = '!'; 
+
 static bool checkValidPosition(int position, char* map);
 static int isReachBound(int position, int width, int height, char bound);  
 static bool moveToNewPosition(player_t* player, int newPosition, char* map); 
 static int getXAxis(int position, int width); 
 static int getYAxis(int position, int width); 
-static double computeDistance(int x1, int y1, int x2, int y2); 
+static double computeDistance(int x1, int y1, int x2, int y2);
+static void getRealPlayerPosition(player_t* player, int width);  
 
 player_t* player_init(char* map) {
     player_t* player = malloc(sizeof(player_t)); 
@@ -34,10 +38,9 @@ player_t* player_init(char* map) {
     // initialize player_seen string
     for (int i = 0; i < strlen(map); i++) {
         if (map[i] == '\n') {
-            printf("hahahhahahahah"); 
             player->player_seen[i] = '\n'; 
         } else {
-            player->player_seen[i] = '!'; 
+            player->player_seen[i] = init_seen_mark; 
         }
     }
     return player; 
@@ -60,19 +63,21 @@ char* player_getVisibility(player_t* player) {
 }
 
 void player_updateVisibility(player_t* player, char* map, int width, double radius) {
+    // consider '\n' before computing 
+    width++; 
+    // get x and y coordinates 
     int playerXCoord = getXAxis(player->player_position, width), playerYCoord = getYAxis(player->player_position, width); 
     for (int position = 0; position < strlen(map); position++) {
         // get x and y coordinates 
         int currXCoord = getXAxis(position, width), currYCoord = getYAxis(position, width); 
         // compute distance
         double distance = computeDistance(currXCoord, currYCoord, playerXCoord, playerYCoord); 
-        if (distance < pow(radius, 2) && player->player_seen[position] == '!') {
+        if (distance < pow(radius, 2) && player->player_seen[position] == init_seen_mark) {
             // if current position is within the circle and it's not been seen yet
             // set it to map[position]
             player->player_seen[position] = map[position]; 
         }
     }
-    player->player_seen[player->player_position] = '*'; 
 }
 
 bool player_move(player_t* player, char k, int width, int height, char* map, double radius) {
@@ -96,6 +101,7 @@ bool player_move(player_t* player, char k, int width, int height, char* map, dou
     case 'l':
         // move right
         // if player already reaches the right boundary
+        printf("position: %d, width: %d, height: %d\n", player->player_position, width, height); 
         if (isReachBound(player->player_position, width, height, 'r') == 1) {
             return true; 
         }
@@ -193,7 +199,8 @@ static int getXAxis(int position, int width) {
 }
 
 static int getYAxis(int position, int width) {
-    return position % width; 
+    int currRow = position / width; 
+    return position % width - currRow;  
 }
 
 // We define a function here in case that we can use different methods to compute distance
@@ -203,6 +210,9 @@ static double computeDistance(int x1, int y1, int x2, int y2) {
 }
 
 static int isReachBound(int position, int width, int height, char bound) {
+    // consider '\n' before computing
+    width++; 
+    
     switch (bound)
     {
     case 't':
@@ -250,8 +260,9 @@ static bool moveToNewPosition(player_t*player, int newPosition, char* map) {
     // otherwise, do nothing
     if (checkValidPosition(newPosition, map)) {
         // reset the originl position because we're begin to move
-        player->player_seen[player->player_position] = '!'; 
+        player->player_seen[player->player_position] = map[player->player_position]; 
         player->player_position = newPosition; 
+        player->player_seen[player->player_position] = player_mark; 
         return true; 
     }
     return false; 
@@ -262,4 +273,9 @@ static bool checkValidPosition(int position, char* map) {
         return true; 
     } 
     return false; 
+}
+
+static void getRealPlayerPosition(player_t* player, int width) {
+    int row = player->player_position / width; 
+    player->player_position -= row; 
 }

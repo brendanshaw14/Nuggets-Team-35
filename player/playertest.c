@@ -14,8 +14,8 @@ See player.h for detailed info.*/
 char* loadMap(FILE* inputMap, int* widthPtr, int* heightPtr) {
     //initialize the new grid structs
     //get row and column parameters
-    char* firstLine = file_readLine(inputMap); 
     int numRows = file_numLines(inputMap); //set the number of rows
+    char* firstLine = file_readLine(inputMap); 
     int numColumns = strlen(firstLine);
 
     *widthPtr = numColumns; 
@@ -50,8 +50,11 @@ int main(const int argc, const char* argv[]) {
     double radius = 4.0; 
     // set player position
     player->player_position = width * height / 2; 
+    // set the init position of player
     printf("position: %d\n", player->player_position); 
-    // scanf("%c", &ch);
+    // mark the player
+    player->player_seen[player->player_position] = '*'; 
+    printf("%s\n\n", player->player_seen); 
     while ((ch = fgetc(stdin)) != EOF) {
         if (ch == '\n')
             continue; 
