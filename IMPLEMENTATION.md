@@ -83,9 +83,67 @@ static int parseArgs(const int argc, char* argv[]);
 	else
 		seed the random-number generator with getpid()
 
-### handling messages (temporary title, dont know what to call it yet)
+#### `message_loop`
 
-handling messages stuff
+The function `message_loop` given to us by the message.c file in the support folder, provides us with the ability to wait for messages sent to the server by the client. The function takes 3 helper functions as arguments and the implementation of these will be described below.
+
+##### `handleTimeout`
+
+After a desired amount of time `const float timeout` without a message, `message_loop` calls `handleTimeout` which runs as follows:
+
+```c
+	print timeout message to server
+	for players in the grid->players hashtable
+	  message_send to players address, with timeout message
+	// extend on closing the server. do i make each player quit or does quitting the server  
+	close the server // game over function?
+	return true // to close the message_loop? dont know if true or false
+```
+
+##### `handleInput`
+
+##### `handleMessage`
+
+Handles the different kinds of messages sent by clients and runs as follows:
+
+```c
+	if message is PLAY
+	  initialize a new player struct, initializing adress position and name
+	  if numPlayers == maxPlayers
+	  	message_send to client saying server is full
+		return false  // to continue loop
+	  add player to players hashtable
+	  increment numPlayers and assign corresponding letter
+	  message_send OK letter, where letter is the assigned letter
+	  message_send GRID nrows ncols to inform player of map size 
+	  // do i send initial display here too?
+	if message is SPECTATE
+	  if there is another spectator // how to implement this? doesnt really work with bag
+	  	message_send QUIT to that player/spectator
+		remove from hashtable
+		initialize a new player struct, using spectator_init
+		message_send GRID with full grid to spectator
+	if message is KEY
+	  will write this soon
+	if all gold was collected
+	  will write this soon
+```
+
+###### player_init
+
+A helper function for initializing the players
+
+```c
+	not written yet
+```
+
+###### spectator_init
+
+A helper function for initializing the spectator
+
+```c
+	not written yet
+```
 
 ---
 
