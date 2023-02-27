@@ -39,10 +39,6 @@ bool initializeGame(const int argc, char* argv[]);
 
 ### Detailed pseudo code
 
-> For each function write pseudocode indented by a tab, which in Markdown will cause it to be rendered in literal form (like a code block).
-> Much easier than writing as a bulleted list!
-> For example:
-
 #### `parseArgs`:
 
 	validate commandline
@@ -251,6 +247,8 @@ Helper function to ensure that the player can move freely.
 
 #### `moveToNewPosition`
 
+Move the player to new position. Update the `player_seen` string and `player_position`.
+
 	check whether current position is valid
 	if so: 
 		reset the `player_seen`
@@ -296,7 +294,7 @@ A helper function for hashtable iterate, for helping each client quit the game
 ---
 ## Grid
 
-The grid module holds most of the important data for the game, including the map, a `hashtable of `player` structures, a `counters` representing the gold piles on the map. 
+The grid module holds most of the important data for the game, including the map, a `hashtable` of `player` structures, a `counters` representing the gold piles on the map. 
 
 ```c
 typedef struct grid {
@@ -390,8 +388,3 @@ Our system testing will involve rigorous testing with the server, client, and mu
 We will also likely try to use a test program to send messages to the server via client or even pre-code certain scenarios or edge cases in to demonstrate funcitonality. 
 
 ---
-
-## Limitations
-
-> Bulleted list of any limitations of your implementation.
-> This section may not be relevant when you first write your Implementation Plan, but could be relevant after completing the implementation.
