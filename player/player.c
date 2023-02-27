@@ -29,13 +29,13 @@ static int isReachBound(int position, int width, int height, char bound);
 static bool moveToNewPosition(player_t* player, int newPosition, char* map); 
 static int getRow(int position, int width); 
 static int getCol(int position, int width); 
-static double computeDistance(int x1, int y1, int x2, int y2);
 static bool isInteger(double a); 
 static bool isRoom(int currCol, int currRow, int playerCol, int playerRow, char* map, int width); 
 static int convertToIndex(int row, int col, int width); 
-static bool checkVertical(char* map, int startCol, int endCol, int startRow, int endRow, int width, double k); 
-static bool checkHorizonal(char* map, int startCol, int endCol, int startRow, int endRow, int width, double k); 
-static void swap(int* a, int* b); 
+static bool checkVertical(char* map, int playerCol, int playerRow, int currCol, int currRow, int width, double k); 
+static bool checkHorizonal(char* map, int playerCol, int playerRow, int currCol, int currRow, int width, double k); 
+static void updateVisibilitySameCol(player_t* player, char* map, int commonCol, int currRow, int playerRow, int width); 
+static void updateVisibilitySameRow(player_t* player, char* map, int commonRow, int currCol, int playerCol, int width); 
 
 player_t* player_init(char* map, int address, int init_position, char* name, bool isSpectator) {
     player_t* player = malloc(sizeof(player_t)); 
@@ -82,10 +82,8 @@ void player_updateVisibility(player_t* player, char* map, int width, int height,
     int playerRow = getRow(player->player_position, width), playerCol = getCol(player->player_position, width);
     printf("curr player row: %d, col: %d\n", playerRow, playerCol); 
     // loop all positions in the range [x - radius, x + radius], [y - radius, y + radius] 
-    int col = playerCol - radius, row = playerRow - radius; 
-    printf("curr col init: %d, curr row init: %d\n", col, row); 
-    for (col = playerCol - radius; col <= playerCol + radius; col++) {
-        for (row = playerRow - radius; row <= playerRow + radius; row++) {
+    for (int col = playerCol - radius; col <= playerCol + radius; col++) {
+        for (int row = playerRow - radius; row <= playerRow + radius; row++) {
             // skip the player position
             if (row == playerRow && col == playerCol) {
                 continue; 
@@ -95,26 +93,17 @@ void player_updateVisibility(player_t* player, char* map, int width, int height,
                 continue; 
             }
             if (col == playerCol) {
-                // cannot calculate the slope
                 // loop all rows
-                int minRow = min(row, playerRow), maxRow = max(row, playerRow); 
-                int i = minRow + 1; 
-                for (i = minRow + 1; i < maxRow; i++) {
-                    int index = convertToIndex(i, col, width); 
-                    // if the path is not available
-                    if (map[index] != '.') {
-                        break; 
-                    }
-                }
-                // if all dots along the path is visible
-                if (i == maxRow) {
-                    int index = convertToIndex(row, col, width); 
-                    player->player_seen[index] = map[index]; 
-                }
+                updateVisibilitySameCol(player, map, col, row, playerRow, width); 
+                
+            } else if (row == playerRow) {
+                // loop all cols
+                updateVisibilitySameRow(player, map, row, col, playerCol, width); 
             } else {
-                printf("curr col: %d, curr row: %d\n", col, row); 
+                // diag direction 
+                // printf("curr col: %d, curr row: %d\n", col, row); 
                 if (isRoom(col, row, playerCol, playerRow, map, width)) {
-                    printf("visible row: %d, visible col: %d\n", row, col); 
+                    // printf("visible row: %d, visible col: %d\n", row, col); 
                     // current position [col, row] can be visible
                     int index = convertToIndex(row, col, width); 
                     player->player_seen[index] = map[index]; 
@@ -124,7 +113,7 @@ void player_updateVisibility(player_t* player, char* map, int width, int height,
     }
 }
 
-bool player_move(player_t* player, char k, int width, int height, char* map, double radius) {
+bool player_move(player_t* player, char k, int width, int height, char* map, int radius) {
     // TODO: add invalid check for k
     // ....
     switch (k)
@@ -238,30 +227,63 @@ bool player_move(player_t* player, char k, int width, int height, char* map, dou
     return true; 
 }
 
+static void updateVisibilitySameCol(player_t* player, char* map, int commonCol, int currRow, int playerRow, int width) {
+    int minRow = min(currRow, playerRow), maxRow = max(currRow, playerRow); 
+    int i = minRow + 1; 
+    for (i = minRow + 1; i < maxRow; i++) {
+        int index = convertToIndex(i, commonCol, width); 
+        // if the path is not available
+        if (map[index] != '.') {
+            break; 
+        }
+    }
+    // if all dots along the path is visible
+    if (i == maxRow) {
+        int index = convertToIndex(currRow, commonCol, width); 
+        player->player_seen[index] = map[index]; 
+    }
+}
+
+static void updateVisibilitySameRow(player_t* player, char* map, int commonRow, int currCol, int playerCol, int width) {
+    int minCol = min(currCol, playerCol), maxCol = max(currCol, playerCol); 
+    int i = minCol + 1; 
+    for (i = minCol + 1; i < maxCol; i++) {
+        int index = convertToIndex(commonRow, i, width); 
+        if (map[index] != '.') {
+            break; 
+        }
+    }
+    // if all dots along the path is visible
+    if (i == maxCol) {
+        int index = convertToIndex(commonRow, currCol, width); 
+        player->player_seen[index] = map[index]; 
+    }
+}
+
 static bool isRoom(int currCol, int currRow, int playerCol, int playerRow, char* map, int width) {
     double k = (playerRow - currRow + 0.0) / (playerCol - currCol + 0.0); 
-    int startCol = min(playerCol, currCol), endCol = max(playerCol, currCol); 
-    int startRow = 0, endRow = 0; 
-    if (k > 0) {
-        // k > 0: 
-        // player is in the diag up-left or bottom-right direction
-        startRow = min(playerRow, currRow); 
-        endRow = max(playerRow, currRow); 
-    } else {
-        // k < 0: 
-        // player is in the diag up-right or bottom-left direction
-        startRow = max(playerRow, currRow); 
-        endRow = min(playerRow, currRow); 
-    } 
-    printf("start row: %d, start col: %d, end col: %d\n", startRow, startCol, endCol); 
+    // printf("start row: %d, start col: %d, end col: %d\n", startRow, startCol, endCol); 
 
-    bool vertical = checkVertical(map, startCol, endCol, startRow, endRow, width, k); 
-    bool horizonal = checkHorizonal(map, startCol, endCol, startRow, endRow, width, k);
+    bool vertical = checkVertical(map, playerCol, playerRow, currCol, currRow, width, k); 
+    bool horizonal = checkHorizonal(map, playerCol, playerRow, currCol, currRow, width, k); 
 
     return vertical && horizonal; 
 }
 
-static bool checkVertical(char* map, int startCol, int endCol, int startRow, int endRow, int width, double k) {
+static bool checkVertical(char* map, int playerCol, int playerRow, int currCol, int currRow, int width, double k) {
+
+    int startCol = 0, endCol = 0, startRow = 0; 
+
+    if (currCol < playerCol) {
+        startCol = currCol; 
+        endCol = playerCol; 
+        startRow = currRow; 
+    } else {
+        startCol = playerCol; 
+        endCol = currCol; 
+        startRow = playerRow; 
+    }
+
     for (int col = startCol + 1; col < endCol; col++) {
         double row = startRow + k * (col - startCol + 0.0); 
 
@@ -270,47 +292,85 @@ static bool checkVertical(char* map, int startCol, int endCol, int startRow, int
             // current row is actually an int, no need to check it's neighbours
             // convert from [col, row] to index
             int index = convertToIndex(row, col, width);  
-            return map[index] == '.';   
+            if (map[index] == '|' || map[index] == '+') {
+                return false; 
+            }  
         } else {
             // current row is actually a floating number, check it's neighbours
             // e.g.: (5, 5.2) -> check (5, 5) and (5, 6)
             int nei1 = floor(row), nei2 = nei1 + 1; 
             // convert from (col, row) to index
             int index1 = convertToIndex(nei1, col, width), index2 = convertToIndex(nei2, col, width); 
-            // if at least one neighbour is room, current position is room
-            return map[index1] == '.' || map[index2] == '.'; 
+            if (map[index1] == '|' && map[index2] == '|') {
+                return false; 
+            } else if (map[index1] == '+' && map[index2] == '|') {
+                return false; 
+            } else if (map[index1] == '|' && map[index2] == '+') {
+                return false; 
+            } else if (map[index1] == '#' && map[index2] == '|') {
+                return false; 
+            } else if (map[index1] == '|' && map[index2] == '#') {
+                return false; 
+            }
+            if (currRow == 17 && currCol == 41) {
+                printf("hahahahahahhahahahaahahahahahahahahahhhh %c %c\n", map[index1], map[index2]); 
+            }
         }
     }
     return true; 
 }
 
-static bool checkHorizonal(char* map, int startCol, int endCol, int startRow, int endRow, int width, double k) {
+static bool checkHorizonal(char* map, int playerCol, int playerRow, int currCol, int currRow, int width, double k) {
     // k > 0: startRow < endRow
-    // k < 0: startRow > endRow, we need to swap before for loop
-    if (k < 0) {
-        printf("start row should be greater than end row.. start: %d, end: %d\n", startRow, endRow); 
-        swap(&startRow, &endRow); 
-        printf("after swapping.... start: %d, end: %d\n", startRow, endRow);
+    // k < 0: startRow > endRow
+    
+    // player: row: 13, col: 24
+    // row: 16, col: 16
+    int startRow = 0, endRow = 0, startCol = 0; 
+
+    if (currRow < playerRow) {
+        startRow = currRow; 
+        endRow = playerRow; 
+        startCol = currCol; 
+    } else {
+        startRow = playerRow; 
+        endRow = currRow; 
+        startCol = playerCol; 
     }
+    
     for (int row = startRow + 1; row < endRow; row++) {
         double col = startCol + (row - startRow + 0.0) / k; 
         // check if current col is an int or not
         if (isInteger(col)) {
             int index = convertToIndex(row, col,width); 
-            return map[index] == '.'; 
+            if (map[index] == '-' || map[index] == '+') {
+                return false; 
+            } 
         } else {
             int nei1 = floor(col), nei2 = nei1 + 1; 
             int index1= convertToIndex(row, nei1, width), index2 = convertToIndex(row, nei2, width); 
-            return map[index1] == '.' || map[index2] == '.'; 
+            if (endRow == 16) {
+                // printf("hahahahahahhahaah %d %d\n", map[index1] == '.', map[index2] == '.'); 
+            }
+            if (map[index1] == '-' && map[index2] == '-') {
+                // -----x------
+                return false; 
+            } else if (map[index1] == '+' && map[index2] == '-') {
+                // +x----
+                return false; 
+            } else if (map[index1] == '-' && map[index2] == '+') {
+                // -----x+
+                return false; 
+            } else if (map[index1] == '-' && map[index2] == '#') {
+                // -----x+
+                return false; 
+            } else if (map[index1] == '#' && map[index2] == '-') {
+                // -----x+
+                return false; 
+            } 
         }
     }
     return true; 
-}
-
-static void swap(int* a, int* b) {
-    int tmp = *a; 
-    *a = *b; 
-    *b = tmp; 
 }
 
 static int convertToIndex(int row, int col, int width) {
@@ -329,12 +389,6 @@ static int getRow(int position, int width) {
 
 static int getCol(int position, int width) {
     return position % width;  
-}
-
-// We define a function here in case that we can use different methods to compute distance
-// Currently is: (x1 - x2)^2 + (y1 - y2)^2 
-static double computeDistance(int x1, int y1, int x2, int y2) {
-    return pow(x1 - x2, 2) + pow(y1 - y2, 2); 
 }
 
 static int isReachBound(int position, int width, int height, char bound) {

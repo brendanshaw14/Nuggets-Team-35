@@ -46,7 +46,7 @@ int main(const int argc, const char* argv[]) {
     player_t* player = player_init(map, -1, 1064, "", false); 
 
     char ch = '\0'; 
-    int radius = 4; 
+    int radius = 18; 
     // set the init position of player
     printf("position: %d\n", player->player_position); 
     // mark the player, show init visible range 
