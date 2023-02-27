@@ -15,6 +15,7 @@ typedef struct player {
     char* player_name; 
     int player_amountOfGold; 
     char* player_seen; 
+    bool player_isSpectator; 
 } player_t; 
 
 const char player_mark = '*'; 
@@ -26,16 +27,17 @@ static bool moveToNewPosition(player_t* player, int newPosition, char* map);
 static int getXAxis(int position, int width); 
 static int getYAxis(int position, int width); 
 static double computeDistance(int x1, int y1, int x2, int y2);
-static void getRealPlayerPosition(player_t* player, int width);  
 
-player_t* player_init(char* map) {
+player_t* player_init(char* map, int address, int init_position, char* name, bool isSpectator) {
     player_t* player = malloc(sizeof(player_t)); 
-    player->player_address = -1; 
-    player->player_position = -1; 
-    player->player_name = ""; 
-    player->player_amountOfGold = 0; 
+    player->player_address = address; 
+    player->player_position = init_position; 
+    player->player_name = name; 
+    player->player_amountOfGold = 0;
+    player->player_isSpectator = isSpectator;  
     player->player_seen = malloc(strlen(map)); 
     // initialize player_seen string
+    // TODO: do we need to visualize the init range of player? 
     for (int i = 0; i < strlen(map); i++) {
         if (map[i] == '\n') {
             player->player_seen[i] = '\n'; 
@@ -43,6 +45,8 @@ player_t* player_init(char* map) {
             player->player_seen[i] = init_seen_mark; 
         }
     }
+    // mark the player 
+    player->player_seen[init_position] = player_mark; 
     return player; 
 }
 
@@ -273,9 +277,4 @@ static bool checkValidPosition(int position, char* map) {
         return true; 
     } 
     return false; 
-}
-
-static void getRealPlayerPosition(player_t* player, int width) {
-    int row = player->player_position / width; 
-    player->player_position -= row; 
 }

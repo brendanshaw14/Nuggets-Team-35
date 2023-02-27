@@ -19,7 +19,7 @@ typedef struct player {
     char* player_seen; 
 } player_t;
 
-player_t* player_init(char* map); 
+player_t* player_init(char* map, int address, int init_position, char* name, bool isSpectator); 
 
 char* player_getName(player_t* player);
 

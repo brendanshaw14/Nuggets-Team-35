@@ -42,18 +42,14 @@ int main(const int argc, const char* argv[]) {
 
     printf("width: %d, height: %d\n", width, height); 
 
-    player_t* player = player_init(map); 
-
-    printf("gggggg %s\n", player->player_seen); 
+    // create a player
+    player_t* player = player_init(map, -1, width * height / 2, "", false); 
 
     char ch = '\0'; 
     double radius = 4.0; 
-    // set player position
-    player->player_position = width * height / 2; 
     // set the init position of player
     printf("position: %d\n", player->player_position); 
     // mark the player
-    player->player_seen[player->player_position] = '*'; 
     printf("%s\n\n", player->player_seen); 
     while ((ch = fgetc(stdin)) != EOF) {
         if (ch == '\n')
