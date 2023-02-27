@@ -198,11 +198,9 @@ After a desired amount of time `const float timeout` without a message, `message
 
 ```c
 	print timeout message to server
-	for players in the grid->players hashtable
-	  message_send to players address, with timeout message
-	// extend on closing the server. do i make each player quit or does quitting the server  
-	close the server // game over function?
-	return true // to close the message_loop? dont know if true or false
+	iterate thorugh players in hashtable using endGame_helper 
+	close the server 
+	return true 
 ```
 
 ##### `handleInput`
@@ -216,12 +214,13 @@ Handles the different kinds of messages sent by clients and runs as follows:
 	  player_init specified in player module, intializing variables of struct
 	  if numPlayers == maxPlayers
 	  	message_send to client saying server is full
-		return false  // to continue loop
+		return false to continue loop
 	  add player to players hashtable
 	  increment numPlayers and assign corresponding letter
 	  message_send OK letter, where letter is the assigned letter
 	  message_send GRID nrows ncols to inform player of map size 
-	  // do i send initial display here too?
+	  update player visibility
+	  message_send DISPLAY\nplayer->player_seen
 	if message is SPECTATE
 	  if there is another spectator 
 	  	message_send QUIT to that player/spectator
@@ -229,24 +228,24 @@ Handles the different kinds of messages sent by clients and runs as follows:
 		initialize a new player struct, using spectator_init                   
 		message_send GRID with full grid to spectator
 	if message is KEY
-	  find player in player hashtable using adress as key // need to check if this change is okay
+	  find player in player hashtable using adress as key
 	  if player is a spectator
 	  	if char == 'Q'
 	  	  message_send QUIT to the spectator
 		  remove spectator from players hashtable
-		  return false  // continue loop
+		  return false to continue loop
 		else
 		  message_send ERROR invalid keystroke
-		  return false  //continue loop
+		  return false to continue loop
 	  if player_move is successful with inputed keystroke
 	  	update grid->gridString
 		iterate thorugh hashtable and update players visibility using updateVisibilities_helper
-		if player_foundGold update players purse and the amount of gold left             // need a func for this to. not helper func tho. in player
+		if player_foundGold update players purse and the amount of gold left  
 		  iterate through hashtable and send_message too all clients about their gold using updateGoldStatus_helper     
 	  else
 	    message_send ERROR, invalid keystroke
 	if goldRemaining == 0
-	  iterate through all players and message_send QUIT    // helper func
+	  iterate through all players and message_send QUIT using endGame_helper
 	  return true to end loop
 ```
 
@@ -283,6 +282,19 @@ A helper function for hashtable iterate, for sending out a message about the gol
 	message_send GOLD n p r 
 	where n is the nuggets just picked up, p is players total nuggets, and r is remaining on the map
 ```
+
+###### endGame_helper
+
+A helper function for hashtable iterate, for helping each client quit the game 
+
+```c
+	player_t player = item
+	hashtable_t players = arg
+	message_send QUIT for that player
+	delete player from players
+	free player
+```
+
 
 ## XYZ module
 
