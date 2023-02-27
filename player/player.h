@@ -29,8 +29,8 @@ int player_getGold(player_t* player);
 
 char* player_getVisibility(player_t* player);
 
-bool player_move(player_t* player, char k, int width, int height, char* map, double radius); 
+bool player_move(player_t* player, char k, int width, int height, char* map, int radius); 
 
-void player_updateVisibility(player_t* player, char* map, int width, double radius); 
+void player_updateVisibility(player_t* player, char* map, int width, int height, int radius); 
 
 #endif
