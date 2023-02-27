@@ -127,6 +127,7 @@ Handles the different kinds of messages sent by clients and runs as follows:
 	  will write this soon
 	if all gold was collected
 	  will write this soon
+	  soon
 ```
 
 ###### player_init
