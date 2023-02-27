@@ -213,7 +213,7 @@ Handles the different kinds of messages sent by clients and runs as follows:
 
 ```c
 	if message is PLAY
-	  initialize a new player struct, initializing adress position and name
+	  player_init specified in player module, intializing variables of struct
 	  if numPlayers == maxPlayers
 	  	message_send to client saying server is full
 		return false  // to continue loop
@@ -223,24 +223,31 @@ Handles the different kinds of messages sent by clients and runs as follows:
 	  message_send GRID nrows ncols to inform player of map size 
 	  // do i send initial display here too?
 	if message is SPECTATE
-	  if there is another spectator // how to implement this? doesnt really work with bag
+	  if there is another spectator 
 	  	message_send QUIT to that player/spectator
 		remove from hashtable
-		initialize a new player struct, using spectator_init
+		initialize a new player struct, using spectator_init                   
 		message_send GRID with full grid to spectator
 	if message is KEY
-	  will write this soon
-	if all gold was collected
-	  will write this soon
-	  soon
-```
-
-###### player_init
-
-A helper function for initializing the players
-
-```c
-	not written yet
+	  find player in player hashtable using adress as key // need to check if this change is okay
+	  if player is a spectator
+	  	if char == 'Q'
+	  	  message_send QUIT to the spectator
+		  remove spectator from players hashtable
+		  return false  // continue loop
+		else
+		  message_send ERROR invalid keystroke
+		  return false  //continue loop
+	  if player_move is successful with inputed keystroke
+	  	update grid->gridString
+		iterate thorugh hashtable and update players visibility using updateVisibilities_helper
+		if player_foundGold update players purse and the amount of gold left             // need a func for this to. not helper func tho. in player
+		  iterate through hashtable and send_message too all clients about their gold using updateGoldStatus_helper     
+	  else
+	    message_send ERROR, invalid keystroke
+	if goldRemaining == 0
+	  iterate through all players and message_send QUIT    // helper func
+	  return true to end loop
 ```
 
 ###### spectator_init
@@ -248,10 +255,34 @@ A helper function for initializing the players
 A helper function for initializing the spectator
 
 ```c
-	not written yet
+	alloc memory for spectator player struct
+	spectator->player_address = address
+	get spectator name from the message string in handleMessage
+	spectator->player_seen = Grid->grid  // the total map
+	return spectator player struct
 ```
 
+###### updateVisibilities_helper
+
+A helper function for hashtable iterate, for updating every players visibility and sending it to their clients
+
+```c
+	player_t player = item
+	update player visibility
+	player->player_seen = that new visibility
+	message_send DISPLAY\nplayer->player_seen
+```
 ---
+
+###### updateGoldStatus_helper
+
+A helper function for hashtable iterate, for sending out a message about the goldStatus to every player
+
+```c
+	player_t player = item
+	message_send GOLD n p r 
+	where n is the nuggets just picked up, p is players total nuggets, and r is remaining on the map
+```
 
 ## XYZ module
 
