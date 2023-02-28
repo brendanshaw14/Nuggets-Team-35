@@ -33,6 +33,7 @@ Icon?
 ._*
 .Spotlight-V*
 .Trashes
+.vscode
 
 ###########################################################################
 # custom additions below here; see also .gitignore files in subdirectories.
