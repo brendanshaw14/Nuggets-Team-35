@@ -70,7 +70,8 @@ player_t* player_init(char* map, int address, int init_position, char* name, boo
     hashtable_insert(blockCharList, "|", ""); 
     hashtable_insert(blockCharList, "+", ""); 
     hashtable_insert(blockCharList, "#", ""); 
-    hashtable_insert(blockCharList, "-", ""); 
+    hashtable_insert(blockCharList, "-", "");
+    hashtable_insert(blockCharList, " ", ""); 
 
     return player; 
 }
@@ -372,7 +373,7 @@ static bool checkVertical(char* map, int playerCol, int playerRow, int currCol, 
             // current row is actually an int, no need to check it's neighbours
             // convert from [col, row] to index
             int index = convertToIndex(row, col, width);  
-            if (map[index] == '|' || map[index] == '+' || map[index] == '#') {
+            if (hashtable_find(blockCharList, charToString(map[index]))) {
                 return false; 
             }  
         } else {
@@ -415,7 +416,7 @@ static bool checkHorizonal(char* map, int playerCol, int playerRow, int currCol,
         // check if current col is an int or not
         if (isInteger(col)) {
             int index = convertToIndex(row, col,width); 
-            if (map[index] == '-' || map[index] == '+' || map[index] == '#') {
+            if (hashtable_find(blockCharList, charToString(map[index]))) {
                 return false; 
             } 
         } else {
