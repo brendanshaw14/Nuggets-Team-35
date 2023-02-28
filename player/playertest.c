@@ -43,15 +43,12 @@ int main(const int argc, const char* argv[]) {
     printf("width: %d, height: %d\n", width, height); 
 
     // create a player
-    player_t* player = player_init(map, -1, 1064, "", false); 
-
-    char ch = '\0'; 
     int radius = 18; 
-    // set the init position of player
-    printf("position: %d\n", player->player_position); 
-    // mark the player, show init visible range 
-    player_updateVisibility(player, map, width, height, radius); 
+    player_t* player = player_init(map, -1, 1064, "", false, width, height, radius); 
+    
     printf("%s\n\n", player->player_seen); 
+    
+    char ch = '\0'; 
     while ((ch = fgetc(stdin)) != EOF) {
         if (ch == '\n')
             continue; 

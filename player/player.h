@@ -22,7 +22,7 @@ typedef struct player {
     bool player_isSpectator; 
 } player_t;
 
-player_t* player_init(char* map, int address, int init_position, char* name, bool isSpectator); 
+player_t* player_init(char* map, int address, int init_position, char* name, bool isSpectator, int width, int height, int radius); 
 
 char* player_getName(player_t* player);
 
