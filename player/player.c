@@ -8,6 +8,7 @@ See player.h for detailed info.*/
 #include <stdbool.h> 
 #include <string.h>
 #include <math.h>
+#include "../libcs50/hashtable.h"
 
 #define max(x, y) (((x) > (y)) ? (x) : (y))
 #define min(x, y) (((x) < (y)) ? (x) : (y))
@@ -18,11 +19,15 @@ typedef struct player {
     char* player_name; 
     int player_amountOfGold; 
     char* player_seen; 
+    hashtable_t* player_passageVisited; 
     bool player_isSpectator; 
 } player_t; 
 
 const char player_mark = '*'; 
 const char init_seen_mark = '!'; 
+const int num_slots = 20; 
+
+hashtable_t* blockCharList; 
 
 static bool checkValidPosition(int position, char* map);
 static int isReachBound(int position, int width, int height, char bound);  
@@ -35,7 +40,10 @@ static int convertToIndex(int row, int col, int width);
 static bool checkVertical(char* map, int playerCol, int playerRow, int currCol, int currRow, int width, double k); 
 static bool checkHorizonal(char* map, int playerCol, int playerRow, int currCol, int currRow, int width, double k); 
 static void updateVisibilitySameCol(player_t* player, char* map, int commonCol, int currRow, int playerRow, int width); 
-static void updateVisibilitySameRow(player_t* player, char* map, int commonRow, int currCol, int playerCol, int width); 
+static void updateVisibilitySameRow(player_t* player, char* map, int commonRow, int currCol, int playerCol, int width);
+static bool isLastPassage(player_t* player, char* map, int currIndex, int width);  
+static char* intToString(int a); 
+static char* charToString(char a); 
 
 player_t* player_init(char* map, int address, int init_position, char* name, bool isSpectator) {
     player_t* player = malloc(sizeof(player_t)); 
@@ -43,6 +51,7 @@ player_t* player_init(char* map, int address, int init_position, char* name, boo
     player->player_position = init_position; 
     player->player_name = name; 
     player->player_amountOfGold = 0;
+    player->player_passageVisited = hashtable_new(num_slots);  
     player->player_isSpectator = isSpectator;  
     player->player_seen = malloc(strlen(map)); 
     // initialize player_seen string
@@ -56,6 +65,13 @@ player_t* player_init(char* map, int address, int init_position, char* name, boo
     }
     // mark the player 
     player->player_seen[init_position] = player_mark; 
+    // set the block char
+    blockCharList = hashtable_new(num_slots); 
+    hashtable_insert(blockCharList, "|", ""); 
+    hashtable_insert(blockCharList, "+", ""); 
+    hashtable_insert(blockCharList, "#", ""); 
+    hashtable_insert(blockCharList, "-", ""); 
+
     return player; 
 }
 
@@ -81,6 +97,29 @@ void player_updateVisibility(player_t* player, char* map, int width, int height,
     // get x and y coordinates 
     int playerRow = getRow(player->player_position, width), playerCol = getCol(player->player_position, width);
     printf("curr player row: %d, col: %d\n", playerRow, playerCol); 
+
+    // if player is in '#' currently, we cannot compute the range
+    int index = convertToIndex(playerRow, playerCol, width); 
+    if (map[index] == '#') {
+        char* indexStr = intToString(index); 
+        printf("%s llllllllllllllllllllllll\n", indexStr); 
+        hashtable_insert(player->player_passageVisited, indexStr, "");
+        // check if it's the last '#'
+        // if not (means there's more '#')
+            // set radius as 1
+        // if yes
+            // don't change radius
+        if (playerRow == 16 && playerCol == 48) {
+            printf("ppppppppppppppppppppppppppp\n"); 
+        }
+        if (!isLastPassage(player, map, index, width)) {
+            if (playerRow == 16 && playerCol == 48) {
+                printf("uuuuuuuuuuuuuuuuuuuuuuuuu\n"); 
+            }
+            radius = 1; 
+        }
+    } 
+
     // loop all positions in the range [x - radius, x + radius], [y - radius, y + radius] 
     for (int col = playerCol - radius; col <= playerCol + radius; col++) {
         for (int row = playerRow - radius; row <= playerRow + radius; row++) {
@@ -227,6 +266,47 @@ bool player_move(player_t* player, char k, int width, int height, char* map, int
     return true; 
 }
 
+static bool isLastPassage(player_t* player, char* map, int currIndex, int width) {
+    // check 4 directions
+    // if there's at least 1 direction is '#' (not previously seen), return false
+    // else, return true
+    int leftIndex = currIndex - 1, rightIndex = currIndex + 1, 
+        upIndex = currIndex - width, downIndex = currIndex + width; 
+
+    char *leftIndexStr = intToString(leftIndex), *rightIndexStr = intToString(rightIndex), 
+        *upIndexStr = intToString(upIndex), *downIndexStr = intToString(downIndex); 
+ 
+
+    printf("currindex: %d, upindex: %d, downindex: %d\n", currIndex, upIndex, downIndex); 
+    printf("map: %c, seen %c\n", map[upIndex], player->player_seen[upIndex]); 
+    
+    if (leftIndex >= 0 && map[leftIndex] == '#' && hashtable_find(player->player_passageVisited, leftIndexStr) == NULL) {
+        return false; 
+    } 
+    if (rightIndex < strlen(map) && map[rightIndex] == '#' && hashtable_find(player->player_passageVisited, rightIndexStr) == NULL) {
+        return false; 
+    } 
+    if (upIndex >= 0 && map[upIndex] == '#' && hashtable_find(player->player_passageVisited, upIndexStr) == NULL) {
+        return false; 
+    } 
+    if (downIndex < strlen(map) && map[downIndex] == '#' && hashtable_find(player->player_passageVisited, downIndexStr) == NULL) {
+        return false; 
+    } 
+    return true; 
+}
+
+static char* intToString(int a) {
+    char* str = malloc(80);  
+    sprintf(str, "%d", a); 
+    return str; 
+}
+
+static char* charToString(char a) {
+    char* str = malloc(1); 
+    str[0] = a; 
+    return str; 
+}
+
 static void updateVisibilitySameCol(player_t* player, char* map, int commonCol, int currRow, int playerRow, int width) {
     int minRow = min(currRow, playerRow), maxRow = max(currRow, playerRow); 
     int i = minRow + 1; 
@@ -292,7 +372,7 @@ static bool checkVertical(char* map, int playerCol, int playerRow, int currCol, 
             // current row is actually an int, no need to check it's neighbours
             // convert from [col, row] to index
             int index = convertToIndex(row, col, width);  
-            if (map[index] == '|' || map[index] == '+') {
+            if (map[index] == '|' || map[index] == '+' || map[index] == '#') {
                 return false; 
             }  
         } else {
@@ -301,20 +381,12 @@ static bool checkVertical(char* map, int playerCol, int playerRow, int currCol, 
             int nei1 = floor(row), nei2 = nei1 + 1; 
             // convert from (col, row) to index
             int index1 = convertToIndex(nei1, col, width), index2 = convertToIndex(nei2, col, width); 
-            if (map[index1] == '|' && map[index2] == '|') {
-                return false; 
-            } else if (map[index1] == '+' && map[index2] == '|') {
-                return false; 
-            } else if (map[index1] == '|' && map[index2] == '+') {
-                return false; 
-            } else if (map[index1] == '#' && map[index2] == '|') {
-                return false; 
-            } else if (map[index1] == '|' && map[index2] == '#') {
+            if (hashtable_find(blockCharList, charToString(map[index1])) && hashtable_find(blockCharList, charToString(map[index2]))) {
                 return false; 
             }
-            if (currRow == 17 && currCol == 41) {
-                printf("hahahahahahhahahahaahahahahahahahahahhhh %c %c\n", map[index1], map[index2]); 
-            }
+            // if (currRow == 17 && currCol == 41) {
+            //     printf("hahahahahahhahahahaahahahahahahahahahhhh %c %c\n", map[index1], map[index2]); 
+            // }
         }
     }
     return true; 
@@ -343,29 +415,13 @@ static bool checkHorizonal(char* map, int playerCol, int playerRow, int currCol,
         // check if current col is an int or not
         if (isInteger(col)) {
             int index = convertToIndex(row, col,width); 
-            if (map[index] == '-' || map[index] == '+') {
+            if (map[index] == '-' || map[index] == '+' || map[index] == '#') {
                 return false; 
             } 
         } else {
             int nei1 = floor(col), nei2 = nei1 + 1; 
             int index1= convertToIndex(row, nei1, width), index2 = convertToIndex(row, nei2, width); 
-            if (endRow == 16) {
-                // printf("hahahahahahhahaah %d %d\n", map[index1] == '.', map[index2] == '.'); 
-            }
-            if (map[index1] == '-' && map[index2] == '-') {
-                // -----x------
-                return false; 
-            } else if (map[index1] == '+' && map[index2] == '-') {
-                // +x----
-                return false; 
-            } else if (map[index1] == '-' && map[index2] == '+') {
-                // -----x+
-                return false; 
-            } else if (map[index1] == '-' && map[index2] == '#') {
-                // -----x+
-                return false; 
-            } else if (map[index1] == '#' && map[index2] == '-') {
-                // -----x+
+            if (hashtable_find(blockCharList, charToString(map[index1])) && hashtable_find(blockCharList, charToString(map[index2]))) {
                 return false; 
             } 
         }

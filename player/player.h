@@ -8,6 +8,7 @@ CS50- Winter 2023*/
 // includes
 #include <stdio.h>
 #include <stdlib.h>
+#include "../libcs50/hashtable.h"
 
 typedef struct player player_t; 
 
@@ -17,6 +18,8 @@ typedef struct player {
     char* player_name; 
     int player_amountOfGold; 
     char* player_seen; 
+    hashtable_t* player_passageVisited; 
+    bool player_isSpectator; 
 } player_t;
 
 player_t* player_init(char* map, int address, int init_position, char* name, bool isSpectator); 
