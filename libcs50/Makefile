@@ -13,7 +13,6 @@ CC = gcc
 MAKE = make
 
 # Build $(LIB) by archiving object files
-# Use provided functions
 $(LIB): libcs50-given.a
 	cp libcs50-given.a $(LIB)
 

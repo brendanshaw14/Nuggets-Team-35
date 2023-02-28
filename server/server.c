@@ -11,7 +11,7 @@ CS50- Winter 2023
 #include <stdlib.h>
 
 //function headers:
-void parseArgs(const int argc, const char* argv[]);
+void parseArgs(const int argc, const char* argv[], int* seed);
 bool handleTimeout(void* arg);
 bool handleMessage(void* arg, const addr_t from, const char* message);
 bool handleInput(void* arg);
@@ -21,7 +21,8 @@ bool handleInput(void* arg);
 /* Psuedocode:
 */
 int main(const int argc, const char* argv[]){
-    parseArgs(argc, argv);
+    int seed = 0;
+    parseArgs(argc, argv, &seed);
     //initialize the message stream
     message_init(stderr);
     //loop through messages
@@ -42,7 +43,7 @@ int main(const int argc, const char* argv[]){
             srand(argv[3]);
 NOTE: THIS METHOD ACCEPTS EXTRANEOUS CHARACTERS INCLUDED IN THE SEED ARGUMENT SO LONG AS AN INT CAN BE PARSED
 */
-void parseArgs(const int argc, const char* argv[]){
+void parseArgs(const int argc, const char* argv[], int* seed){
     //if one or two args were provided
     if (argc == 2 || argc == 3){
         //test the map is openeable for reading
@@ -53,16 +54,11 @@ void parseArgs(const int argc, const char* argv[]){
             fprintf(stderr, "Error: Unable to read map file input.");
             exit(2);
         }
-        if (argc == 2){
-            srand(getpid());
-        } 
-        else {
-            int seed;
-            if (sscanf(argv[2], "%d", &seed) != 1){
+        if (argc == 3){
+            if (sscanf(argv[2], "%d", seed) != 1){
                 fprintf(stderr, "Error: Unable to read seed");
                 exit(3);
             }
-            srand(seed);
         }
     }
     else{ 
