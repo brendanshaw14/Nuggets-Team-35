@@ -9,7 +9,6 @@ See grid.h for detailed info.*/
 #include <string.h>
 #include <unistd.h>
 #include <math.h>
-#include "../libcs50/hashtable.h"
 #include "../libcs50/counters.h"
 #include "../libcs50/file.h"
 #include "../libcs50/mem.h"
@@ -18,7 +17,7 @@ See grid.h for detailed info.*/
 /****************global types**************/
 typedef struct grid {
     char* gridString;
-    player_t* playerArray; 
+    player_t* playerArray[27]; 
     counters_t* goldTable;
     int numRows;
     int numColumns;
@@ -37,8 +36,6 @@ static const int GoldMaxNumPiles = 30; // maximum number of gold piles
 grid_t* grid_init(FILE* inputMap){
     //initialize the new grid structs
     grid_t* grid = mem_malloc(sizeof(grid_t)); //make a new grid
-    // init the player array, include the spectator
-    grid->playerArray = mem_malloc(sizeof(player_t) * (MaxPlayers + 1)); 
     //get row and column parameters
     grid -> numRows = file_numLines(inputMap); //set the number of rows
     char* firstLine = file_readLine(inputMap); 
@@ -78,7 +75,7 @@ bool grid_placeGold(grid_t* grid, int minPiles, int maxPiles, int seed){
     char currentChar;
     int goldInPile;
     //set the seed
-    if (seed != -1){
+    if (seed != 0){
         srand(seed);
         printf("got the seed");
     }
@@ -100,24 +97,30 @@ bool grid_placeGold(grid_t* grid, int minPiles, int maxPiles, int seed){
         }
     }
     //place the final pile
-    while (goldPlaced != 250){
-        index = rand() % (grid -> numColumns * grid -> numRows) + 1; //get a random index in the map
-        currentChar = grid -> gridString[index];
-        if (currentChar == '.'){
-                goldInPile = GoldTotal - goldPlaced;
-                counters_set(goldCounter, index, goldInPile);
-                goldPlaced += goldInPile;
-                printf("\nAdded %d gold to the pile", goldInPile);
-                pilesPlaced ++;
-                grid -> gridString[index] = '*';
-        }
-    }
+    index = rand() % (grid -> numColumns * grid -> numRows) + 1; //get a random index in the map
+    goldInPile = GoldTotal - goldPlaced;
+    counters_set(goldCounter, index, goldInPile);
+    goldPlaced += goldInPile;
+    pilesPlaced ++;
     printf("Number of piles: %d, Total gold: %d", pilesPlaced, goldPlaced);
     return true;
 }
 
 
-//bool grid_addPlayer(grid_t* grid, player_t* player){
-    //get the grid's hashtable
-    
-//}
+bool grid_addPlayer(grid_t* grid, player_t* newPlayer){
+    //check if grid or player is null
+    if (grid == NULL || newPlayer == NULL){
+        return false;
+    }
+    //get a random positon
+    int index;
+    char* currentChar = ' ';
+    while (currentChar != '.'){
+        index = rand() % (grid -> numColumns * grid -> numRows) + 1; //get a random index in the map
+        currentChar = grid -> gridString[index];
+        if (currentChar == '.'){
+            newPlayer -> player_position = index;
+        }
+    }
+    return true;
+}

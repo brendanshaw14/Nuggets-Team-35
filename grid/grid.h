@@ -9,6 +9,7 @@ CS50- Winter 2023*/
 #include <string.h>
 #include "../libcs50/hashtable.h"
 #include "../libcs50/counters.h"
+#include "../player/player.h"
 
 
 /****************global types**************/
@@ -17,7 +18,7 @@ typedef struct grid grid_t;  // opaque to users of the module
 /****************global types**************/
 typedef struct grid {
     char* gridString;
-    hashtable_t* playerTable;
+    player_t* playerTable[27];
     counters_t* goldTable;
     int numRows;
     int numColumns;
@@ -39,3 +40,11 @@ Takes a grid to place into, a max number of piles, and a min number of piles.
 Returns True upon success 
 */
 bool grid_placeGold(grid_t* grid, int minPiles, int maxPiles, int seed);
+
+/**********grid_addPlayer*********/
+/* Adds the given player into the map into a random location
+returns true if added,
+false upon failure
+*/
+bool grid_addPlayer(grid_t* grid, player_t* newPlayer);
+
