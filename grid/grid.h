@@ -32,8 +32,10 @@ typedef struct grid {
 
 /***********grid_init*************/
 /* Initializes a new grid given an input map file
-save the number of rows and columns
-Loop through each line of the map
+    -
+Requires: a pointer to a valid input map file. 
+Returns: NULL if file isn't accessible; Otherwise returns
+a new grid. 
 */
 grid_t* grid_init(FILE* inputMap);
 
