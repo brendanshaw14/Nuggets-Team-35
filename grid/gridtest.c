@@ -12,11 +12,16 @@ Author: Brendan Shaw, February 2023*/
 
 
 int main(const int argc, const char* argv[]){
-    //invalid map tests
-    printf("\nInvalid args tests:\n");
-    printf("No args:\n");
     FILE* map;
-    grid_t* grid = grid_init("main.txt"); 
+    //load some mapos 
+    printf("\nLoading the main map:");
+    map = fopen("../maps/main.txt", "r");
+    grid_t* grid = grid_init(map);
+    printf("\nPrinting the first grid: %s", grid -> gridString);
+    printf("\nAdding the gold with Null seedd. ");
+    grid_placeGold(grid, 10, 30, 250, NULL);
+    printf("\nPrinting the first grid with gold: %s", grid -> gridString);
+
     return 0;
 }
 

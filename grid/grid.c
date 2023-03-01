@@ -23,6 +23,10 @@ static const int GoldMaxNumPiles = 30; // maximum number of gold piles
 
 //initialize a grid given an input map file
 grid_t* grid_init(FILE* inputMap){
+    //return null if map doesn't exist
+    if (inputMap == NULL){
+        return NULL;
+    }
     //initialize the new grid structs
     grid_t* grid = mem_malloc(sizeof(grid_t)); //make a new grid
     // initialize the player to be NULL
