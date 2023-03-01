@@ -9,14 +9,14 @@ PROG = server
 all: $(PROG)
 
 # Object files
-OBJS = server.o ../grid/grid.o 
+OBJS = server.o ../player/player.o ../grid/grid.o 
 LIBS = ../support/libsupport.a ../libcs50/libcs50-given.a
 
 server: $(OBJS) $(LIBS) 
-	$(CC) $(CFLAGS) $^ -o $@
+	$(CC) $(CFLAGS) $^ -o $@ -lm
 
 %.o: %.c $(LIBS)
-	$(CC) $(CFLAGS) -c $< -o $@
+	$(CC) $(CFLAGS) -c $< -o $@ -lm
 
 clean:
 	rm -f $(PROG) $(OBJS)

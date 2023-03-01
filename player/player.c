@@ -139,7 +139,7 @@ player_t* player_init(grid_t* grid, int address, char* name, bool isSpectator, i
     return player; 
 }
 
-void player_delete(player_t* player){
+void player_delete(player_t* player) {
     free(player->player_name);
     free(player->player_seen);
     free(player->player_passageVisited);
