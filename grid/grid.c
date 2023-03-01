@@ -13,11 +13,12 @@ See grid.h for detailed info.*/
 #include "../libcs50/counters.h"
 #include "../libcs50/file.h"
 #include "../libcs50/mem.h"
+#include "../player/player.h"
 
 /****************global types**************/
 typedef struct grid {
     char* gridString;
-    hashtable_t* playerTable;
+    player_t* playerArray; 
     counters_t* goldTable;
     int numRows;
     int numColumns;
@@ -36,7 +37,8 @@ static const int GoldMaxNumPiles = 30; // maximum number of gold piles
 grid_t* grid_init(FILE* inputMap){
     //initialize the new grid structs
     grid_t* grid = mem_malloc(sizeof(grid_t)); //make a new grid
-    grid -> playerTable = hashtable_new(26); //make a player table with 26 spots
+    // init the player array, include the spectator
+    grid->playerArray = mem_malloc(sizeof(player_t) * (MaxPlayers + 1)); 
     //get row and column parameters
     grid -> numRows = file_numLines(inputMap); //set the number of rows
     char* firstLine = file_readLine(inputMap); 
