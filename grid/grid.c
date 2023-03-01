@@ -25,13 +25,6 @@ typedef struct grid {
     int goldRemaining;
 } grid_t;
 
-/****************file-local global variables*/
-static const int MaxNameLength = 50;   // max number of chars in playerName
-static const int MaxPlayers = 26;      // maximum number of players
-static const int GoldTotal = 250;      // amount of gold in the game
-static const int GoldMinNumPiles = 10; // minimum number of gold piles
-static const int GoldMaxNumPiles = 30; // maximum number of gold piles
-
 //initialize a grid given an input map file
 grid_t* grid_init(FILE* inputMap){
     //initialize the new grid structs
@@ -65,7 +58,7 @@ while not all the pieces have been added
     increment
 when the last piece is reached before 250, add the remaining gold to that pile
 */
-bool grid_placeGold(grid_t* grid, int minPiles, int maxPiles, int seed){
+bool grid_placeGold(grid_t* grid, int minPiles, int maxPiles, int GoldTotal, int seed){
     counters_t* goldCounter = counters_new(); //make a counters to store the gold piles and their indexes
     int goldPlaced = 0;
     int pilesPlaced = 0;
@@ -109,7 +102,7 @@ bool grid_placeGold(grid_t* grid, int minPiles, int maxPiles, int seed){
     return true;
 }
 
-
+//adds the given player struct to the given grid's playerArray
 bool grid_addPlayer(grid_t* grid, player_t* newPlayer){
     //check if grid or player is null
     if (grid == NULL || newPlayer == NULL){
@@ -118,9 +111,11 @@ bool grid_addPlayer(grid_t* grid, player_t* newPlayer){
     //get a random positon
     int index;
     char currentChar = ' ';
+    //loop until a room character is found
     while (currentChar != '.'){
         index = rand() % (grid -> numColumns * grid -> numRows) + 1; //get a random index in the map
         currentChar = grid -> gridString[index];
+        //add the character when found 
         if (currentChar == '.'){
             newPlayer -> player_position = index;
         }

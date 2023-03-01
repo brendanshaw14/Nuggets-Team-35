@@ -12,16 +12,10 @@ Author: Brendan Shaw, February 2023*/
 
 
 int main(const int argc, const char* argv[]){
-    //verify arg file can be opened for reading
-    FILE* fp = fopen(argv[1], "r");
-    if (fp == NULL){
-        fprintf(stderr, "Invalid Grid Test Map");
-        exit(1);
-    }
-    grid_t* grid = grid_init(fp);
-    printf("%s", grid -> gridString);
-    grid_placeGold(grid, 10, 30, -1);
-    printf("%s", grid -> gridString);
+    //invalid map tests
+    printf("\nInvalid args tests:\n");
+    printf("No args:\n");
+    grid_t* grid = grid_init("main.txt"); 
     return 0;
 }
 

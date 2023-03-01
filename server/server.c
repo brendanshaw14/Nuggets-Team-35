@@ -9,9 +9,20 @@ CS50- Winter 2023
 #include <stdio.h>
 #include <stdbool.h>
 #include <stdlib.h>
+#include <string.h>
+#include "../grid/grid.h"
+
+/****************file-local global variables**************/
+static const int MaxNameLength = 50;   // max number of chars in playerName
+static const int MaxPlayers = 26;      // maximum number of players
+static const int GoldTotal = 250;      // amount of gold in the game
+static const int GoldMinNumPiles = 10; // minimum number of gold piles
+static const int GoldMaxNumPiles = 30; // maximum number of gold piles
+
 
 //function headers:
-void parseArgs(const int argc, const char* argv[], int* seed);
+
+grid_t* initializeGame(const int argc, const char* argv[]);
 bool handleTimeout(void* arg);
 bool handleMessage(void* arg, const addr_t from, const char* message);
 bool handleInput(void* arg);
@@ -21,8 +32,8 @@ bool handleInput(void* arg);
 /* Psuedocode:
 */
 int main(const int argc, const char* argv[]){
-    int seed = 0;
-    parseArgs(argc, argv, &seed);
+    
+    initializeGame(argc, argv);
     //initialize the message stream
     message_init(stderr);
     //loop through messages
@@ -33,17 +44,21 @@ int main(const int argc, const char* argv[]){
     return 0;
 }
 
-/*************parseArgs*************/
+/*************initializeGame*************/
 /*  Check that either 1 or 2 arguments were provided
     if not, print error message, exit non-zero
     if so, verify the map can be opened for reading
         if 1 argument
             srand(getpid());
+            load the map
         else 
             srand(argv[3]);
 NOTE: THIS METHOD ACCEPTS EXTRANEOUS CHARACTERS INCLUDED IN THE SEED ARGUMENT SO LONG AS AN INT CAN BE PARSED
 */
-void parseArgs(const int argc, const char* argv[], int* seed){
+
+grid_t* initializeGame(const int argc, const char* argv[]){
+    //hold the seed and map
+    int seed = -1;
     //if one or two args were provided
     if (argc == 2 || argc == 3){
         //test the map is openeable for reading
@@ -54,19 +69,24 @@ void parseArgs(const int argc, const char* argv[], int* seed){
             fprintf(stderr, "Error: Unable to read map file input.");
             exit(2);
         }
+        
         if (argc == 3){
-            if (sscanf(argv[2], "%d", seed) != 1){
+            if (sscanf(argv[2], "%d", &seed) != 1){
                 fprintf(stderr, "Error: Unable to read seed");
                 exit(3);
             }
         }
+        grid_t* grid = grid_init(map);
+        grid_placeGold(grid, GoldMinNumPiles, GoldMaxNumPiles, GoldTotal, seed);
+        return grid;
     }
     else{ 
         fprintf(stderr, "Error: Incorrect number of arguments");
         exit(1);
     }
-    return;
+    return NULL;
 }
+
 //handle timeout starter function
 bool handleTimeout(void* arg){
     return true;

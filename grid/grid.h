@@ -39,7 +39,7 @@ grid_t* grid_init(FILE* inputMap);
 Takes a grid to place into, a max number of piles, and a min number of piles. 
 Returns True upon success 
 */
-bool grid_placeGold(grid_t* grid, int minPiles, int maxPiles, int seed);
+bool grid_placeGold(grid_t* grid, int minPiles, int maxPiles, int goldTotal, int seed);
 
 /**********grid_addPlayer*********/
 /* Adds the given player into the map into a random location
