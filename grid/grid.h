@@ -32,18 +32,19 @@ typedef struct grid {
 
 /***********grid_init*************/
 /* Initializes a new grid given an input map file
-    -
+    -sets all players in the grid array to NULL
+    -sets the numPlayers to 0, goldRemaining to 250
+    -construct the grid gridString
 Requires: a pointer to a valid input map file. 
 Returns: NULL if file isn't accessible; Otherwise returns
 a new grid. 
+Notes: We assume the map, if not NULL, is a valid map. 
 */
 grid_t* grid_init(FILE* inputMap);
 
 
 /**********grid_placeGold*********/
-/* Places the gold in piles with random amounts of pieces randomly across the map. 
-Takes a grid to place into, a max number of piles, and a min number of piles. 
-Returns True upon success 
+/*
 */
 bool grid_placeGold(grid_t* grid, int minPiles, int maxPiles, int goldTotal, int seed);
 

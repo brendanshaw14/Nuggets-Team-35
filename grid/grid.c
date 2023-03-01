@@ -29,6 +29,9 @@ grid_t* grid_init(FILE* inputMap){
     }
     //initialize the new grid structs
     grid_t* grid = mem_malloc(sizeof(grid_t)); //make a new grid
+    //set variables to their defaults
+    grid -> numPlayers = 0;
+    grid -> goldRemaining = 250;
     // initialize the player to be NULL
     for (int i = 0; i < MaxPlayers + 1; i++) {
         grid->playerArray[i] = NULL; 
