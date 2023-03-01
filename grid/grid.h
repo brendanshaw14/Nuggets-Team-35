@@ -52,4 +52,9 @@ false upon failure
 */
 bool grid_addPlayer(grid_t* grid, player_t* newPlayer);
 
+
+/**********grid_delete*********/
+/*Deletes the given grid
+*/
+void grid_delete(grid_t* grid);
 #endif

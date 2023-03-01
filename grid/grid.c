@@ -119,3 +119,13 @@ bool grid_addPlayer(grid_t* grid, player_t* newPlayer){
     }
     return true;
 }
+
+void grid_delete(grid_t* grid){
+    //free the grid string 
+    mem_free(grid->gridString);
+    //free the players
+    //for (int i = 0; i < MaxPlayers+1; i ++){
+        //player_
+    //}
+    return;
+}

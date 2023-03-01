@@ -11,6 +11,7 @@ CS50- Winter 2023
 #include <stdlib.h>
 #include <string.h>
 #include "../grid/grid.h"
+#include "../player/player.h"
 
 /****************file-local global variables**************/
 static const int MaxNameLength = 50;   // max number of chars in playerName
@@ -33,11 +34,11 @@ bool handleInput(void* arg);
 */
 int main(const int argc, const char* argv[]){
     
-    initializeGame(argc, argv);
+    grid_t* grid = initializeGame(argc, argv);
     //initialize the message stream
     message_init(stderr);
     //loop through messages
-    message_loop(NULL, 100, handleTimeout, handleInput, handleMessage);
+    message_loop(grid, 100, handleTimeout, handleInput, handleMessage);
     //end the message stream
     message_done();
 

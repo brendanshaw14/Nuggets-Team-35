@@ -15,6 +15,7 @@ int main(const int argc, const char* argv[]){
     //invalid map tests
     printf("\nInvalid args tests:\n");
     printf("No args:\n");
+    FILE* map;
     grid_t* grid = grid_init("main.txt"); 
     return 0;
 }
