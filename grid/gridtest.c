@@ -21,6 +21,7 @@ int main(const int argc, const char* argv[]){
     printf("%s", grid -> gridString);
     grid_placeGold(grid, 10, 30, -1);
     printf("%s", grid -> gridString);
+    printf("player: s")
     return 0;
 }
 

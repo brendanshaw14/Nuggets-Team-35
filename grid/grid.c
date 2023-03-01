@@ -36,6 +36,9 @@ static const int GoldMaxNumPiles = 30; // maximum number of gold piles
 grid_t* grid_init(FILE* inputMap){
     //initialize the new grid structs
     grid_t* grid = mem_malloc(sizeof(grid_t)); //make a new grid
+    for (int i = 0; i < 27; i ++){
+        grid -> playerArray[i] = NULL;
+    }
     //get row and column parameters
     grid -> numRows = file_numLines(inputMap); //set the number of rows
     char* firstLine = file_readLine(inputMap); 
@@ -75,7 +78,7 @@ bool grid_placeGold(grid_t* grid, int minPiles, int maxPiles, int seed){
     char currentChar;
     int goldInPile;
     //set the seed
-    if (seed != 0){
+    if (seed != -1){
         srand(seed);
         printf("got the seed");
     }
@@ -114,7 +117,7 @@ bool grid_addPlayer(grid_t* grid, player_t* newPlayer){
     }
     //get a random positon
     int index;
-    char* currentChar = ' ';
+    char currentChar = ' ';
     while (currentChar != '.'){
         index = rand() % (grid -> numColumns * grid -> numRows) + 1; //get a random index in the map
         currentChar = grid -> gridString[index];
