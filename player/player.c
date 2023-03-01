@@ -136,7 +136,7 @@ player_t* player_init(grid_t* grid, int address, char* name, bool isSpectator, i
     player->player_seen = malloc(strlen(map)); 
     // initialize player_seen string
     if (!isSpectator) {
-        // if it's not a regular player, we should initialize the string as empty
+        // if it's a regular player, we should initialize the string as empty
         for (int i = 0; i < strlen(map); i++) {
             if (map[i] == '\n') {
                 player->player_seen[i] = '\n'; 
