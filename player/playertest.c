@@ -11,35 +11,9 @@ See player.h for detailed info.*/
 #include "player.h"
 #include "../grid/grid.h"
 
-
-char* loadMap(FILE* inputMap, int* widthPtr, int* heightPtr) {
-    //initialize the new grid structs
-    //get row and column parameters
-    int numRows = file_numLines(inputMap); //set the number of rows
-    char* firstLine = file_readLine(inputMap); 
-    int numColumns = strlen(firstLine);
-
-    *widthPtr = numColumns; 
-    *heightPtr = numRows; 
-
-    char* map = malloc((numColumns + 1) * numRows + 1); 
-    char* nextLine = malloc(numColumns + 1);
-    //put the first line in    
-    strcat(firstLine, "\n");
-    strcat(map, firstLine);
-    //read through the lines of the map, adding the null terminator and pasting them into the gridString
-    while ((nextLine = file_readLine(inputMap)) != NULL){
-        strcat(nextLine, "\n");
-        strcat(map, nextLine);
-    }
-    return map;
-}
-
 int main(const int argc, const char* argv[]) {
     FILE* fp = fopen(argv[1], "r"); 
     int width = 0, height = 0; 
-    char* map = loadMap(fp, &width, &height); 
-    printf("%s", map);
 
     printf("width: %d, height: %d\n", width, height); 
 
