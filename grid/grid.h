@@ -2,6 +2,9 @@
 Authors: Brendan Shaw, Romeo Myrthil, Ming Cheng
 CS50- Winter 2023*/
 
+#ifndef _GRID_H_
+#define _GRID_H_
+
 //includes
 #include <stdio.h>
 #include <stdbool.h>
@@ -13,12 +16,13 @@ CS50- Winter 2023*/
 
 
 /****************global types**************/
-typedef struct grid grid_t;  // opaque to users of the module
+// typedef struct grid grid_t;  // opaque to users of the module
 
-/****************global types**************/
+typedef struct player player_t; 
+
 typedef struct grid {
     char* gridString;
-    player_t* playerTable[27];
+    player_t* playerArray[27]; 
     counters_t* goldTable;
     int numRows;
     int numColumns;
@@ -48,3 +52,4 @@ false upon failure
 */
 bool grid_addPlayer(grid_t* grid, player_t* newPlayer);
 
+#endif

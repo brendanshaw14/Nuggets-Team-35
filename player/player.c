@@ -9,23 +9,15 @@ See player.h for detailed info.*/
 #include <string.h>
 #include <math.h>
 #include "../libcs50/hashtable.h"
+#include "../grid/grid.h"
 
 #define max(x, y) (((x) > (y)) ? (x) : (y))
 #define min(x, y) (((x) < (y)) ? (x) : (y))
 
-typedef struct player {
-    int player_address; 
-    int player_position; 
-    char* player_name; 
-    int player_amountOfGold; 
-    char* player_seen; 
-    hashtable_t* player_passageVisited; 
-    bool player_isSpectator; 
-} player_t; 
-
 const char player_mark = '*'; 
 const char init_seen_mark = ' '; 
 const int num_slots = 20; 
+const int max_player_number = 26; 
 
 hashtable_t* blockCharList; 
 
@@ -42,10 +34,14 @@ static bool checkHorizonal(char* map, int playerCol, int playerRow, int currCol,
 static void updateVisibilitySameCol(player_t* player, char* map, int commonCol, int currRow, int playerRow, int width); 
 static void updateVisibilitySameRow(player_t* player, char* map, int commonRow, int currCol, int playerCol, int width);
 static bool isLastPassage(player_t* player, char* map, int currIndex, int width);  
+static bool isPlayer(grid_t* grid, int position); 
+static void updateGoldAmount(player_t* player, grid_t* grid); 
 static char* intToString(int a); 
 static char* charToString(char a); 
 
-void player_updateVisibility(player_t* player, char* map, int width, int height, int radius) {
+void player_updateVisibility(player_t* player, grid_t* grid) {
+    char* map = grid->gridString; 
+    int width = grid->numColumns, height = grid->numRows, radius = player->player_visibility_range; 
     // consider '\n' before computing 
     width++; 
     // get x and y coordinates 
@@ -79,23 +75,37 @@ void player_updateVisibility(player_t* player, char* map, int width, int height,
             if (col == playerCol) {
                 // loop all rows
                 updateVisibilitySameCol(player, map, col, row, playerRow, width); 
-                
+                // if there's another player, show it
+                int index = convertToIndex(row, col, width); 
+                if (isPlayer(grid, index)) {
+                    player->player_seen[index] = player_mark; 
+                }
             } else if (row == playerRow) {
                 // loop all cols
                 updateVisibilitySameRow(player, map, row, col, playerCol, width); 
+                // if there's another player, show it
+                int index = convertToIndex(row, col, width); 
+                if (isPlayer(grid, index)) {
+                    player->player_seen[index] = player_mark; 
+                }
             } else {
                 // diag direction 
                 if (isRoom(col, row, playerCol, playerRow, map, width)) {
                     // current position [col, row] can be visible
                     int index = convertToIndex(row, col, width); 
                     player->player_seen[index] = map[index]; 
+                    // if there's another player in this position, show it
+                    if (isPlayer(grid, index)) {
+                        player->player_seen[index] = player_mark; 
+                    }
                 }
             }
         }
     }
 }
 
-player_t* player_init(char* map, int address, int init_position, char* name, bool isSpectator, int width, int height, int radius) {
+player_t* player_init(grid_t* grid, int address, int init_position, char* name, bool isSpectator, int radius) {
+    char* map = grid->gridString; 
     player_t* player = malloc(sizeof(player_t)); 
     player->player_address = address; 
     player->player_position = init_position; 
@@ -103,6 +113,7 @@ player_t* player_init(char* map, int address, int init_position, char* name, boo
     player->player_amountOfGold = 0;
     player->player_passageVisited = hashtable_new(num_slots);  
     player->player_isSpectator = isSpectator;  
+    player->player_visibility_range = radius; 
     player->player_seen = malloc(strlen(map)); 
     // initialize player_seen string
     for (int i = 0; i < strlen(map); i++) {
@@ -123,7 +134,8 @@ player_t* player_init(char* map, int address, int init_position, char* name, boo
     hashtable_insert(blockCharList, " ", ""); 
 
     // visualize the init range of player
-    player_updateVisibility(player, map, width, height, radius);
+    player_updateVisibility(player, grid); 
+    printf("%s\n", player->player_seen); 
 
     return player; 
 }
@@ -144,7 +156,9 @@ char* player_getVisibility(player_t* player) {
     return player->player_seen; 
 }
 
-bool player_move(player_t* player, char k, int width, int height, char* map, int radius) {
+bool player_move(player_t* player, grid_t* grid, char k) {
+    char* map = grid->gridString; 
+    int width = grid->numColumns, height = grid->numRows; 
     // TODO: add invalid check for k
     // ....
     switch (k)
@@ -158,8 +172,9 @@ bool player_move(player_t* player, char k, int width, int height, char* map, int
         // move to new position
         if (moveToNewPosition(player, player->player_position - 1, map)) {
             // update the "seen" string
-            player_updateVisibility(player, map, width, height, radius); 
-            // TODO: if new position is gold, update player_amountOfGold, better define another function to do this
+            player_updateVisibility(player, grid); 
+            // if new position is gold, update player_amountOfGold
+            updateGoldAmount(player, grid); 
         }
         break;
     case 'l':
@@ -171,7 +186,9 @@ bool player_move(player_t* player, char k, int width, int height, char* map, int
         // move to new position
         if (moveToNewPosition(player, player->player_position + 1, map)) {
             // update the "seen" string
-            player_updateVisibility(player, map, width, height, radius); 
+            player_updateVisibility(player, grid); 
+            // if new position is gold, update player_amountOfGold
+            updateGoldAmount(player, grid); 
         } 
         break; 
     case 'j':
@@ -183,7 +200,9 @@ bool player_move(player_t* player, char k, int width, int height, char* map, int
         // move to new position
         if (moveToNewPosition(player, player->player_position + width + 1, map)) {
             // update the "seen" string
-            player_updateVisibility(player, map, width, height, radius); 
+            player_updateVisibility(player, grid); 
+            // if new position is gold, update player_amountOfGold
+            updateGoldAmount(player, grid); 
         }
         break; 
     case 'k':
@@ -195,7 +214,9 @@ bool player_move(player_t* player, char k, int width, int height, char* map, int
         // move to new position
         if (moveToNewPosition(player, player->player_position - width - 1, map)) {
             // update the "seen" string
-            player_updateVisibility(player, map, width, height, radius); 
+            player_updateVisibility(player, grid); 
+            // if new position is gold, update player_amountOfGold
+            updateGoldAmount(player, grid); 
         }
         break; 
     case 'y': 
@@ -208,7 +229,9 @@ bool player_move(player_t* player, char k, int width, int height, char* map, int
         // move to new position
         if (moveToNewPosition(player, player->player_position - width - 2, map)) {
             // update the "seen" string
-            player_updateVisibility(player, map, width, height, radius); 
+            player_updateVisibility(player, grid); 
+            // if new position is gold, update player_amountOfGold
+            updateGoldAmount(player, grid); 
         }
         break; 
     case 'u':
@@ -221,7 +244,9 @@ bool player_move(player_t* player, char k, int width, int height, char* map, int
         // move to new position
         if (moveToNewPosition(player, player->player_position - width, map)) {
             // update the "seen" string
-            player_updateVisibility(player, map, width, height, radius); 
+            player_updateVisibility(player, grid); 
+            // if new position is gold, update player_amountOfGold
+            updateGoldAmount(player, grid); 
         }
         break; 
     case 'b': 
@@ -234,7 +259,9 @@ bool player_move(player_t* player, char k, int width, int height, char* map, int
         // move to new position
         if (moveToNewPosition(player, player->player_position + width, map)) {
             // update the "seen" string
-            player_updateVisibility(player, map, width, height, radius); 
+            player_updateVisibility(player, grid); 
+            // if new position is gold, update player_amountOfGold
+            updateGoldAmount(player, grid);  
         }
         break; 
     case 'n':
@@ -247,13 +274,39 @@ bool player_move(player_t* player, char k, int width, int height, char* map, int
         // move to new position
         if (moveToNewPosition(player, player->player_position + width + 2, map)) {
             // update the "seen" string
-            player_updateVisibility(player, map, width, height, radius); 
+            player_updateVisibility(player, grid); 
+            // if new position is gold, update player_amountOfGold
+            updateGoldAmount(player, grid); 
         }
         break; 
     default:
         break;
     }
     return true; 
+}
+
+static void updateGoldAmount(player_t* player, grid_t* grid) {
+    int amountOfGold = counters_get(grid->goldTable, player->player_position); 
+    if (amountOfGold > 0) {
+        // update gold amount of current player
+        player->player_amountOfGold += amountOfGold; 
+        // set current gold to be 0
+        counters_set(grid->goldTable, player->player_position, 0); 
+    }
+}
+
+static bool isPlayer(grid_t* grid, int position) {
+    // add 1 to consider spectator 
+    for (int i = 0; i < max_player_number + 1; i++) {
+        // TODO: do we need to check spectator here? 
+        // if (grid->playerArray[i] != NULL && !grid->playerArray[i]->player_isSpectator) {
+        if (grid->playerArray[i] != NULL) {
+            if (position == grid->playerArray[i]->player_position) {
+                return true; 
+            }
+        }
+    }
+    return false; 
 }
 
 static bool isLastPassage(player_t* player, char* map, int currIndex, int width) {

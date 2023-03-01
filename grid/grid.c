@@ -14,23 +14,20 @@ See grid.h for detailed info.*/
 #include "../libcs50/mem.h"
 #include "../player/player.h"
 
-/****************global types**************/
-typedef struct grid {
-    char* gridString;
-    player_t* playerArray[27]; 
-    counters_t* goldTable;
-    int numRows;
-    int numColumns;
-    int numPlayers;
-    int goldRemaining;
-} grid_t;
+/****************file-local global variables*/
+static const int MaxNameLength = 50;   // max number of chars in playerName
+static const int MaxPlayers = 26;      // maximum number of players
+static const int GoldTotal = 250;      // amount of gold in the game
+static const int GoldMinNumPiles = 10; // minimum number of gold piles
+static const int GoldMaxNumPiles = 30; // maximum number of gold piles
 
 //initialize a grid given an input map file
 grid_t* grid_init(FILE* inputMap){
     //initialize the new grid structs
     grid_t* grid = mem_malloc(sizeof(grid_t)); //make a new grid
-    for (int i = 0; i < 27; i ++){
-        grid -> playerArray[i] = NULL;
+    // initialize the player to be NULL
+    for (int i = 0; i < MaxPlayers + 1; i++) {
+        grid->playerArray[i] = NULL; 
     }
     //get row and column parameters
     grid -> numRows = file_numLines(inputMap); //set the number of rows

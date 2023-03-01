@@ -9,6 +9,7 @@ See player.h for detailed info.*/
 #include <string.h> 
 #include "../libcs50/file.h"
 #include "player.h"
+#include "../grid/grid.h"
 
 
 char* loadMap(FILE* inputMap, int* widthPtr, int* heightPtr) {
@@ -44,16 +45,21 @@ int main(const int argc, const char* argv[]) {
 
     // create a player
     int radius = 18; 
-    player_t* player = player_init(map, -1, 1064, "", false, width, height, radius); 
-    
-    printf("%s\n\n", player->player_seen); 
-    
+    grid_t* grid = grid_init(fp); 
+    player_t* player = player_init(grid, -1, 1064, "1", false, radius); 
+    // player_t* player1 = player_init(grid, -1, 770, "", false, radius); 
+    player_t* player1 = player_init(grid, -1, 1066, "2", false, radius);
+
+    // add these two players into grid (manually for now)
+    grid->playerArray[0] = player; 
+    grid->playerArray[2] = player1; 
+
     char ch = '\0'; 
     while ((ch = fgetc(stdin)) != EOF) {
         if (ch == '\n')
             continue; 
         printf("curr direc: %c\n", ch); 
-        player_move(player, (char)ch, width, height, map, radius); 
+        player_move(player, grid, ch); 
         printf("%s\n\n", player->player_seen); 
     }
 
