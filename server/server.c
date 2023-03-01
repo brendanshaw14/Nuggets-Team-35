@@ -100,6 +100,69 @@ bool handleInput(void* arg){
 
 //handle message starter function
 bool handleMessage(void* arg, const addr_t from, const char* message){
+    // if message is PLAY
+  if (strncmp(message, "PLAY ", strlen("PLAY ")) == 0) 
+  {
+    const char* content = message + strlen("PLAY ");
+    //   ... work with content...
+    // 	  player_init specified in player module, intializing variables of struct
+    // 	  if numPlayers == maxPlayers
+    // 	  	message_send to client saying server is full
+    // 		return false to continue loop
+    // 	  add player to players hashtable
+    // 	  increment numPlayers and assign corresponding letter
+    // 	  message_send OK letter, where letter is the assigned letter
+    // 	  message_send GRID nrows ncols to inform player of map size 
+    // 	  update player visibility
+    // 	  message_send DISPLAY\nplayer->player_seen
+  } 
+  // 	if message is SPECTATE
+  else if (strncmp(message, "SPECTATE ", strlen("SPECTATE ")) == 0)
+  {
+    const char* content = message + strlen("SPECTATE ");
+    //   ... work with content...
+    // 	  if there is another spectator 
+    // 	  	message_send QUIT to that player/spectator
+    // 		remove from hashtable
+    // 		initialize a new player struct, using spectator_init                   
+    // 		message_send GRID with full grid to spectator
+  }
+  // 	if message is KEY
+  else if (strncmp(message, "KEY ", strlen("KEY ")) == 0)
+  {
+    const char* content = message + strlen("KEY ");
+    //   ... work with content...
+    // 	  find player in player hashtable using adress as key
+    // 	  if player is a spectator
+    // 	  	if char == 'Q'
+    // 	  	  message_send QUIT to the spectator
+    // 		  remove spectator from players hashtable
+    // 		  return false to continue loop
+    // 		else
+    // 		  message_send ERROR invalid keystroke
+    // 		  return false to continue loop
+    // 	  if player_move is successful with inputed keystroke
+    // 	  	update grid->gridString
+    // 		iterate thorugh hashtable and update players visibility using updateVisibilities_helper
+    // 		if player_foundGold update players purse and the amount of gold left  
+    // 		  iterate through hashtable and send_message too all clients about their gold using updateGoldStatus_helper     
+    // 	  else
+    // 	    message_send ERROR, invalid keystroke
+  } 
+  // 	if goldRemaining == 0
+  else if ()
+  {
+    // 	  iterate through all players and message_send QUIT using endGame_helper
+    // 	  return true to end loop
+  }
+    
+    
+    
+    
+    
+    
+
+
     printf("%s\n", message);
     return true;
 }
