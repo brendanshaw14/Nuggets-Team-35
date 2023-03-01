@@ -108,7 +108,7 @@ player_t* player_init(grid_t* grid, int address, char* name, bool isSpectator, i
     char* map = grid->gridString; 
     player_t* player = malloc(sizeof(player_t)); 
     player->player_address = address; 
-    player->player_position = 0; //MAY WANT TO CHANGE THIS
+    player->player_position = 0; // TODO: MAY WANT TO CHANGE THIS
     player->player_name = name; 
     player->player_amountOfGold = 0;
     player->player_passageVisited = hashtable_new(num_slots);  

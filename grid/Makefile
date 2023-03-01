@@ -17,10 +17,10 @@ OBJS = grid.o ../player/player.o gridtest.o
 all: $(PROG)
 
 $(PROG): $(OBJS) $(LIBS)
-	$(CC) $(CFLAGS) $^ -o $@
+	$(CC) $(CFLAGS) $^ -o $@ -lm
 
 %.o: %.c $(LIBS) ../player/player.h grid.h 
-	$(CC) $(CFLAGS) -c $< -o $@
+	$(CC) $(CFLAGS) -c $< -o $@ -lm
 
 test: 
 	./gridtest ../maps/main.txt
