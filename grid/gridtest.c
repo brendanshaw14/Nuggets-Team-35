@@ -8,6 +8,7 @@ Author: Brendan Shaw, February 2023*/
 #include <string.h>
 #include <stdbool.h>
 #include "grid.h"
+#include "../player/player.h"
 
 
 int main(const int argc, const char* argv[]){
@@ -21,7 +22,6 @@ int main(const int argc, const char* argv[]){
     printf("%s", grid -> gridString);
     grid_placeGold(grid, 10, 30, -1);
     printf("%s", grid -> gridString);
-    printf("player: s")
     return 0;
 }
 
