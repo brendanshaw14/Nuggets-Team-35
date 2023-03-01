@@ -124,8 +124,8 @@ void grid_delete(grid_t* grid){
     //free the grid string 
     mem_free(grid->gridString);
     //free the players
-    //for (int i = 0; i < MaxPlayers+1; i ++){
-        //player_
-    //}
+    for (int i = 0; i < MaxPlayers+1; i ++){
+        player_delete(grid -> playerArray[i]);
+    }
     return;
 }

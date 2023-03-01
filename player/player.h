@@ -24,7 +24,9 @@ typedef struct player {
     bool player_isSpectator; 
 } player_t; 
 
-player_t* player_init(grid_t* grid, int address, int init_position, char* name, bool isSpectator, int radius); 
+player_t* player_init(grid_t* grid, int address, char* name, bool isSpectator, int radius); 
+
+void player_delete(player_t* player);
 
 char* player_getName(player_t* player);
 

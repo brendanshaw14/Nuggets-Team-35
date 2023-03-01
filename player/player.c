@@ -104,11 +104,11 @@ void player_updateVisibility(player_t* player, grid_t* grid) {
     }
 }
 
-player_t* player_init(grid_t* grid, int address, int init_position, char* name, bool isSpectator, int radius) {
+player_t* player_init(grid_t* grid, int address, char* name, bool isSpectator, int radius) {
     char* map = grid->gridString; 
     player_t* player = malloc(sizeof(player_t)); 
     player->player_address = address; 
-    player->player_position = init_position; 
+    player->player_position = 0; //MAY WANT TO CHANGE THIS
     player->player_name = name; 
     player->player_amountOfGold = 0;
     player->player_passageVisited = hashtable_new(num_slots);  
@@ -123,8 +123,7 @@ player_t* player_init(grid_t* grid, int address, int init_position, char* name, 
             player->player_seen[i] = init_seen_mark; 
         }
     }
-    // mark the player 
-    player->player_seen[init_position] = player_mark; 
+
     // set the block char
     blockCharList = hashtable_new(num_slots); 
     hashtable_insert(blockCharList, "|", ""); 
@@ -138,6 +137,13 @@ player_t* player_init(grid_t* grid, int address, int init_position, char* name, 
     printf("%s\n", player->player_seen); 
 
     return player; 
+}
+
+void player_delete(player_t* player){
+    free(player->player_name);
+    free(player->player_seen);
+    free(player->player_passageVisited);
+    return;
 }
 
 char* player_getName(player_t* player) {

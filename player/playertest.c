@@ -46,9 +46,9 @@ int main(const int argc, const char* argv[]) {
     // create a player
     int radius = 18; 
     grid_t* grid = grid_init(fp); 
-    player_t* player = player_init(grid, -1, 1064, "1", false, radius); 
+    player_t* player = player_init(grid, -1, "1", false, radius); 
     // player_t* player1 = player_init(grid, -1, 770, "", false, radius); 
-    player_t* player1 = player_init(grid, -1, 1066, "2", false, radius);
+    player_t* player1 = player_init(grid, -1, "2", false, radius);
 
     // add these two players into grid (manually for now)
     grid->playerArray[0] = player; 
