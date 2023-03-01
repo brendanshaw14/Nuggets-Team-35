@@ -46,13 +46,20 @@ int main(const int argc, const char* argv[]) {
     // create a player
     int radius = 18; 
     grid_t* grid = grid_init(fp); 
-    player_t* player = player_init(grid, -1, "1", false, radius); 
+    player_t* player = player_init(grid, 100, "1", false, radius); 
     // player_t* player1 = player_init(grid, -1, 770, "", false, radius); 
-    player_t* player1 = player_init(grid, -1, "2", false, radius);
+    player_t* player1 = player_init(grid, 101, "2", true, radius);
 
     // add these two players into grid (manually for now)
-    grid->playerArray[0] = player; 
-    grid->playerArray[2] = player1; 
+    grid_addPlayer(grid, player); 
+    grid_addPlayer(grid, player1); 
+
+    // visualize the two players initially 
+    player_updateVisibility(player, grid); 
+    player_updateVisibility(player1, grid); 
+
+    printf("player1: \n%s\n", player->player_seen); 
+    printf("player2: \n%s\n", player1->player_seen); 
 
     char ch = '\0'; 
     while ((ch = fgetc(stdin)) != EOF) {
@@ -60,7 +67,10 @@ int main(const int argc, const char* argv[]) {
             continue; 
         printf("curr direc: %c\n", ch); 
         player_move(player, grid, ch); 
-        printf("%s\n\n", player->player_seen); 
+        printf("current regular player\n %s\n\n", player->player_seen); 
+        // refresh what spectator sees 
+        player_updateSpecVisibility(player1, grid); 
+        printf("current spec player \n %s\n\n", player1->player_seen); 
     }
 
     return 0;

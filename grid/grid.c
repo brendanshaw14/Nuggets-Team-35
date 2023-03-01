@@ -21,6 +21,8 @@ static const int GoldTotal = 250;      // amount of gold in the game
 static const int GoldMinNumPiles = 10; // minimum number of gold piles
 static const int GoldMaxNumPiles = 30; // maximum number of gold piles
 
+static bool addPlayerInArray(grid_t* grid, player_t* player); 
+
 //initialize a grid given an input map file
 grid_t* grid_init(FILE* inputMap){
     //return null if map doesn't exist
@@ -122,6 +124,10 @@ bool grid_addPlayer(grid_t* grid, player_t* newPlayer){
         //add the character when found 
         if (currentChar == '.'){
             newPlayer -> player_position = index;
+            // add this player into the playerArray
+            if (!addPlayerInArray(grid, newPlayer)) 
+                return false; 
+            printf("player name: %s, player position: %d\n", newPlayer->player_name, newPlayer->player_position); 
         }
     }
     return true;
@@ -132,7 +138,23 @@ void grid_delete(grid_t* grid){
     mem_free(grid->gridString);
     //free the players
     for (int i = 0; i < MaxPlayers+1; i ++){
-        player_delete(grid -> playerArray[i]);
+        player_delete(grid -> playerArray[i], grid);
     }
     return;
+}
+
+static bool addPlayerInArray(grid_t* grid, player_t* player) {
+    int i = 0; 
+    for (i = 0; i < MaxPlayers + 1; i++) {
+        if (grid->playerArray[i] == NULL) 
+            break; 
+    } 
+    if (i == MaxPlayers + 1) {
+        // current array is full
+        fprintf(stderr, "Error: Cannot add new player in the array.\n");
+        return false; 
+    }
+    // add this player
+    grid->playerArray[i] = player; 
+    return true; 
 }

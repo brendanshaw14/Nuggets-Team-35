@@ -26,7 +26,7 @@ typedef struct player {
 
 player_t* player_init(grid_t* grid, int address, char* name, bool isSpectator, int radius); 
 
-void player_delete(player_t* player);
+void player_delete(player_t* player, grid_t* grid); 
 
 char* player_getName(player_t* player);
 
@@ -39,5 +39,7 @@ char* player_getVisibility(player_t* player);
 bool player_move(player_t* player, grid_t* grid, char k); 
 
 void player_updateVisibility(player_t* player, grid_t* grid); 
+
+void player_updateSpecVisibility(player_t* player, grid_t* grid); 
 
 #endif

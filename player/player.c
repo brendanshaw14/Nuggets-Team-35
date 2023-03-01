@@ -36,6 +36,7 @@ static void updateVisibilitySameRow(player_t* player, char* map, int commonRow, 
 static bool isLastPassage(player_t* player, char* map, int currIndex, int width);  
 static bool isPlayer(grid_t* grid, int position); 
 static void updateGoldAmount(player_t* player, grid_t* grid); 
+static void updatePlayerArray(player_t* player, grid_t* grid); 
 static char* intToString(int a); 
 static char* charToString(char a); 
 
@@ -66,6 +67,9 @@ void player_updateVisibility(player_t* player, grid_t* grid) {
         for (int row = playerRow - radius; row <= playerRow + radius; row++) {
             // skip the player position
             if (row == playerRow && col == playerCol) {
+                int index = convertToIndex(row, col, width); 
+                // mark the current player itself 
+                player->player_seen[index] = player_mark; 
                 continue; 
             }
             // if exeeds bound, continue
@@ -104,6 +108,21 @@ void player_updateVisibility(player_t* player, grid_t* grid) {
     }
 }
 
+void player_updateSpecVisibility(player_t* player, grid_t* grid) {
+    // as for the spectator, it should show all players in the map
+    char* map = grid->gridString; 
+    // loop the whole seen string, and visualize all players 
+    for (int i = 0; i < strlen(map); i++) {
+        if (isPlayer(grid, i)) {
+            // current index is player, set it as player 
+            player->player_seen[i] = player_mark; 
+        } else {
+            // current index is not player, set is the same as map
+            player->player_seen[i] = map[i]; 
+        }
+    }
+} 
+
 player_t* player_init(grid_t* grid, int address, char* name, bool isSpectator, int radius) {
     char* map = grid->gridString; 
     player_t* player = malloc(sizeof(player_t)); 
@@ -116,13 +135,20 @@ player_t* player_init(grid_t* grid, int address, char* name, bool isSpectator, i
     player->player_visibility_range = radius; 
     player->player_seen = malloc(strlen(map)); 
     // initialize player_seen string
-    for (int i = 0; i < strlen(map); i++) {
-        if (map[i] == '\n') {
-            player->player_seen[i] = '\n'; 
-        } else {
-            player->player_seen[i] = init_seen_mark; 
+    if (!isSpectator) {
+        // if it's not a regular player, we should initialize the string as empty
+        for (int i = 0; i < strlen(map); i++) {
+            if (map[i] == '\n') {
+                player->player_seen[i] = '\n'; 
+            } else {
+                player->player_seen[i] = init_seen_mark; 
+            }
         }
+    } else {
+        // if it's spectator, we should initialize the string to be the same as the map
+        strcpy(player->player_seen, map); 
     }
+    
 
     // set the block char
     blockCharList = hashtable_new(num_slots); 
@@ -132,14 +158,23 @@ player_t* player_init(grid_t* grid, int address, char* name, bool isSpectator, i
     hashtable_insert(blockCharList, "-", "");
     hashtable_insert(blockCharList, " ", ""); 
 
-    // visualize the init range of player
-    player_updateVisibility(player, grid); 
-    printf("%s\n", player->player_seen); 
+    // // visualize the init range of player
+    // player_updateVisibility(player, grid); 
+    // printf("%s\n", player->player_seen); 
 
     return player; 
 }
 
-void player_delete(player_t* player) {
+void player_delete(player_t* player, grid_t* grid) {
+    // delete this player in the playerArray in grid
+    for (int i = 0; i < max_player_number + 1; i++) {
+        // use address to compare the player
+        if (grid->playerArray[i] != NULL && grid->playerArray[i]->player_address == player->player_address) {
+            // set it to NULL 
+            grid->playerArray[i] = NULL; 
+            break; 
+        }
+    }
     free(player->player_name);
     free(player->player_seen);
     free(player->player_passageVisited);
@@ -165,6 +200,7 @@ char* player_getVisibility(player_t* player) {
 bool player_move(player_t* player, grid_t* grid, char k) {
     char* map = grid->gridString; 
     int width = grid->numColumns, height = grid->numRows; 
+    int newPosition = -1; 
     // TODO: add invalid check for k
     // ....
     switch (k)
@@ -175,13 +211,7 @@ bool player_move(player_t* player, grid_t* grid, char k) {
         if (isReachBound(player->player_position, width, height, 'l') == 1) {
             return true; 
         } 
-        // move to new position
-        if (moveToNewPosition(player, player->player_position - 1, map)) {
-            // update the "seen" string
-            player_updateVisibility(player, grid); 
-            // if new position is gold, update player_amountOfGold
-            updateGoldAmount(player, grid); 
-        }
+        newPosition = player->player_position - 1; 
         break;
     case 'l':
         // move right
@@ -189,13 +219,7 @@ bool player_move(player_t* player, grid_t* grid, char k) {
         if (isReachBound(player->player_position, width, height, 'r') == 1) {
             return true; 
         }
-        // move to new position
-        if (moveToNewPosition(player, player->player_position + 1, map)) {
-            // update the "seen" string
-            player_updateVisibility(player, grid); 
-            // if new position is gold, update player_amountOfGold
-            updateGoldAmount(player, grid); 
-        } 
+        newPosition = player->player_position + 1; 
         break; 
     case 'j':
         // move down
@@ -203,13 +227,7 @@ bool player_move(player_t* player, grid_t* grid, char k) {
         if (isReachBound(player->player_position, width, height, 'b') == 1) {
             return true; 
         }
-        // move to new position
-        if (moveToNewPosition(player, player->player_position + width + 1, map)) {
-            // update the "seen" string
-            player_updateVisibility(player, grid); 
-            // if new position is gold, update player_amountOfGold
-            updateGoldAmount(player, grid); 
-        }
+        newPosition = player->player_position + width + 1; 
         break; 
     case 'k':
         // move up
@@ -217,13 +235,7 @@ bool player_move(player_t* player, grid_t* grid, char k) {
         if (isReachBound(player->player_position, width, height, 't') == 1) {
             return true; 
         }
-        // move to new position
-        if (moveToNewPosition(player, player->player_position - width - 1, map)) {
-            // update the "seen" string
-            player_updateVisibility(player, grid); 
-            // if new position is gold, update player_amountOfGold
-            updateGoldAmount(player, grid); 
-        }
+        newPosition = player->player_position - width - 1; 
         break; 
     case 'y': 
         // move diagonally up and left
@@ -232,13 +244,7 @@ bool player_move(player_t* player, grid_t* grid, char k) {
             isReachBound(player->player_position, width, height, 'l') == 1) {
                 return true; 
         } 
-        // move to new position
-        if (moveToNewPosition(player, player->player_position - width - 2, map)) {
-            // update the "seen" string
-            player_updateVisibility(player, grid); 
-            // if new position is gold, update player_amountOfGold
-            updateGoldAmount(player, grid); 
-        }
+        newPosition = player->player_position - width - 2; 
         break; 
     case 'u':
         // move diagonally up and right
@@ -247,13 +253,7 @@ bool player_move(player_t* player, grid_t* grid, char k) {
             isReachBound(player->player_position, width, height, 'r') == 1) {
                 return true; 
         } 
-        // move to new position
-        if (moveToNewPosition(player, player->player_position - width, map)) {
-            // update the "seen" string
-            player_updateVisibility(player, grid); 
-            // if new position is gold, update player_amountOfGold
-            updateGoldAmount(player, grid); 
-        }
+        newPosition = player->player_position - width; 
         break; 
     case 'b': 
         // move diagonally down and left
@@ -262,13 +262,7 @@ bool player_move(player_t* player, grid_t* grid, char k) {
             isReachBound(player->player_position, width, height, 'l') == 1) {
                 return true; 
         } 
-        // move to new position
-        if (moveToNewPosition(player, player->player_position + width, map)) {
-            // update the "seen" string
-            player_updateVisibility(player, grid); 
-            // if new position is gold, update player_amountOfGold
-            updateGoldAmount(player, grid);  
-        }
+        newPosition = player->player_position + width; 
         break; 
     case 'n':
         // move diagonally down and right
@@ -277,18 +271,47 @@ bool player_move(player_t* player, grid_t* grid, char k) {
             isReachBound(player->player_position, width, height, 'r') == 1) {
                 return true; 
         } 
-        // move to new position
-        if (moveToNewPosition(player, player->player_position + width + 2, map)) {
-            // update the "seen" string
+        newPosition = player->player_position + width + 2; 
+        break; 
+    default:
+        return false; 
+    }
+
+    // Code below does the following: 
+        // 1. Move the player 
+        // 2. Update the player's visibility
+        // 3. Update gold amount if finding a gold
+        // 4. Update the playerArray
+
+    if (moveToNewPosition(player, newPosition, map)) {
+        // update the "seen" string
+        if (!player->player_isSpectator) {
+            // only for regular player
             player_updateVisibility(player, grid); 
             // if new position is gold, update player_amountOfGold
             updateGoldAmount(player, grid); 
+        } else {
+            // only for spectator
+            player_updateSpecVisibility(player, grid); 
+            // no need to update gold amount for spectator
         }
-        break; 
-    default:
-        break;
+        // update the playerArray if it's regular player or spectator 
+        updatePlayerArray(player, grid); 
     }
+
+
     return true; 
+}
+
+static void updatePlayerArray(player_t* player, grid_t* grid) {
+    for (int i = 0; i < max_player_number + 1; i++) {
+        // find the correct player
+        if (grid->playerArray[i] && grid->playerArray[i]->player_address == player->player_address) {
+            // update it's position
+            grid->playerArray[i] = player; 
+            break; 
+        }
+    }
 }
 
 static void updateGoldAmount(player_t* player, grid_t* grid) {
