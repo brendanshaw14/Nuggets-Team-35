@@ -69,12 +69,11 @@ while not all the pieces have been added
 when the last piece is reached before 250, add the remaining gold to that pile
 */
 bool grid_placeGold(grid_t* grid, int minPiles, int maxPiles, int GoldTotal, int seed){
+    grid -> goldTable = counters_new();
     int goldPlaced = 0;
     int pilesPlaced = 0;
     int minPerPile = (GoldTotal/maxPiles);
     int maxPerPile = (GoldTotal/minPiles);
-    printf("min per pile: %d", minPerPile);
-    printf("max per pile: %d", maxPerPile);
     //loop through random indexes
     int index;
     char currentChar;
@@ -82,7 +81,6 @@ bool grid_placeGold(grid_t* grid, int minPiles, int maxPiles, int GoldTotal, int
     //set the seed
     if (seed != -1){
         srand(seed);
-        printf("got the seed");
     }
     else{
         srand(getpid());
@@ -96,7 +94,6 @@ bool grid_placeGold(grid_t* grid, int minPiles, int maxPiles, int GoldTotal, int
             goldInPile = rand() % (maxPerPile - minPerPile) + minPerPile; //amt of gold in this pile
             counters_set(grid -> goldTable, index, goldInPile);
             goldPlaced += goldInPile;
-            printf("\nAdded %d gold to the pile", goldInPile);
             pilesPlaced ++;
             grid -> gridString[index] = '*';
         }
@@ -107,7 +104,6 @@ bool grid_placeGold(grid_t* grid, int minPiles, int maxPiles, int GoldTotal, int
     counters_set(grid -> goldTable, index, goldInPile);
     goldPlaced += goldInPile;
     pilesPlaced ++;
-    printf("Number of piles: %d, Total gold: %d", pilesPlaced, goldPlaced);
     return true;
 }
 
@@ -128,9 +124,9 @@ bool grid_addPlayer(grid_t* grid, player_t* newPlayer){
         if (currentChar == '.'){
             newPlayer -> player_position = index;
             // add this player into the playerArray
-            if (!addPlayerInArray(grid, newPlayer)) 
+            if (!addPlayerInArray(grid, newPlayer)){
                 return false; 
-            printf("player name: %s, player position: %d\n", newPlayer->player_name, newPlayer->player_position); 
+            }
         }
     }
     return true;

@@ -16,8 +16,6 @@ CS50- Winter 2023*/
 
 
 /****************global types**************/
-// typedef struct grid grid_t;  // opaque to users of the module
-
 typedef struct player player_t; 
 
 typedef struct grid {
@@ -44,14 +42,26 @@ grid_t* grid_init(FILE* inputMap);
 
 
 /**********grid_placeGold*********/
-/*
+/* Places the given goldTotal gold into the grid with an amount in between minPiles and maxPiles
+Requires: a valid grid, valid min and max piles
+Guarantees: 
+    - num piles placed will be between minPiles and maxPiles
+    - gold will only be placed within the rooms of the map
+    - the total gold placed will be totalGold
+Notes: does not initialize the gold counters, this is done in placeGold
 */
 bool grid_placeGold(grid_t* grid, int minPiles, int maxPiles, int goldTotal, int seed);
 
 /**********grid_addPlayer*********/
 /* Adds the given player into the map into a random location
-returns true if added,
-false upon failure
+Requires: a valid grid and a valid player 
+Returns:
+    -false if either of these are null or if the array is full
+    -true if the player was added
+Guarantees:
+    -the player will be placed into a room randomly
+    -the player will only be placed into an empty room space- not a player or gold pile
+Notes: 
 */
 bool grid_addPlayer(grid_t* grid, player_t* newPlayer);
 
