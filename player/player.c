@@ -124,7 +124,7 @@ void player_updateSpecVisibility(player_t* player, grid_t* grid) {
     }
 } 
 
-player_t* player_init(grid_t* grid, addr_t address, char* name, bool isSpectator, int radius) {
+player_t* player_init(grid_t* grid, addr_t address, char* name, bool isSpectator, int radius, char letter) {
     char* map = grid->gridString; 
     player_t* player = malloc(sizeof(player_t)); 
     player->player_address = address; 
@@ -135,6 +135,7 @@ player_t* player_init(grid_t* grid, addr_t address, char* name, bool isSpectator
     player->player_isSpectator = isSpectator;  
     player->player_visibility_range = radius; 
     player->player_seen = malloc(strlen(map)); 
+    player->player_letter = letter;
     // initialize player_seen string
     if (!isSpectator) {
         // if it's a regular player, we should initialize the string as empty

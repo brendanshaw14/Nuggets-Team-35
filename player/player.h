@@ -23,9 +23,10 @@ typedef struct player {
     char* player_seen; 
     hashtable_t* player_passageVisited; 
     bool player_isSpectator; 
+    char player_letter;
 } player_t; 
 
-player_t* player_init(grid_t* grid, addr_t address, char* name, bool isSpectator, int radius); 
+player_t* player_init(grid_t* grid, addr_t address, char* name, bool isSpectator, int radius, char letter); 
 
 void player_delete(player_t* player, grid_t* grid); 
 
