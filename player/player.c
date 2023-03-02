@@ -121,14 +121,11 @@ void player_updateSpecVisibility(player_t* player, grid_t* grid) {
     char* map = grid->gridString; 
     // loop the whole seen string, and visualize all players 
     for (int i = 0; i < strlen(map); i++) {
-        if (isPlayer(grid, i)) {
+        int locationInArray = isPlayer(grid, i); 
+        if (locationInArray != -1) {
             // current index is player, set it as player 
-            int locationInArray = isPlayer(grid, i); 
-            if (locationInArray != -1) {
-                // set the player as player_letter
-                printf("lllllllllll, %d\n", locationInArray); 
-                player->player_seen[i] = grid->playerArray[locationInArray]->player_letter;
-            }
+            // set the player as player_letter
+            player->player_seen[i] = grid->playerArray[locationInArray]->player_letter;
         } else {
             // current index is not player, set is the same as map
             player->player_seen[i] = map[i]; 
@@ -355,8 +352,7 @@ static void updateGoldAmount(player_t* player, grid_t* grid) {
 // otherwise, return -1 
 static int isPlayer(grid_t* grid, int position) {
     // add 1 to consider spectator 
-    int i = 0; 
-    for (i = 0; i < max_player_number + 1; i++) {
+    for (int i = 0; i < max_player_number + 1; i++) {
         // need to check spectator here
         if (grid->playerArray[i] != NULL && !grid->playerArray[i]->player_isSpectator) {
             if (position == grid->playerArray[i]->player_position) {

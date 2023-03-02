@@ -31,9 +31,7 @@ int main(const int argc, const char* argv[]) {
     address_spec->sin_family = 1; 
 
     player_t* player = player_init(grid, *address1, "name1", false, radius, 'A'); 
-    // player_t* player1 = player_init(grid, -1, 770, "", false, radius); 
     player_t* player1 = player_init(grid, *address2, "name2", false, radius, 'B');
-
     player_t* spectator = player_init(grid, *address_spec, "name_spec", true, radius, ' ');
 
 
@@ -58,11 +56,11 @@ int main(const int argc, const char* argv[]) {
         if (ch == '\n')
             continue; 
         printf("curr direc: %c\n", ch); 
-        player_move(player, grid, ch); 
-        printf("current regular player\n%s\n\n", player->player_seen); 
+        player_move(player1, grid, ch); 
+        printf("current regular player\n%s\n\n", player1->player_seen); 
         // refresh what spectator sees 
-        player_updateSpecVisibility(player1, grid); 
-        printf("current spec player \n%s\n\n", player1->player_seen); 
+        player_updateSpecVisibility(spectator, grid); 
+        printf("current spec player \n%s\n\n", spectator->player_seen); 
     }
 
     return 0;
