@@ -169,7 +169,7 @@ player_t* player_init(grid_t* grid, addr_t address, char* name, bool isSpectator
 void player_delete(player_t* player, grid_t* grid) {
     // delete this player in the playerArray in grid
     for (int i = 0; i < max_player_number + 1; i++) {
-        // use address to compare the player
+        // check if a player exists for that i and use address to compare the player 
         if (grid->playerArray[i] != NULL && message_eqAddr(grid->playerArray[i]->player_address, player->player_address)) {
             // set it to NULL
             grid->playerArray[i] = NULL; 
