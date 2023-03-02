@@ -185,12 +185,6 @@ void player_delete(player_t* player, grid_t* grid) {
             grid->playerArray[i] = NULL; 
             break; 
         }
-
-        // if (grid->playerArray[i] != NULL && grid->playerArray[i]->player_address == player->player_address) {
-        //     // set it to NULL 
-        //     grid->playerArray[i] = NULL; 
-        //     break; 
-        // }
     }
     free(player->player_name);
     free(player->player_seen);
@@ -328,13 +322,6 @@ static void updatePlayerArray(player_t* player, grid_t* grid) {
             grid->playerArray[i] = player; 
             break; 
         }
-
-
-        // if (grid->playerArray[i] && grid->playerArray[i]->player_address == player->player_address) {
-        //     // update it's position
-        //     grid->playerArray[i] = player; 
-        //     break; 
-        // }
     }
 }
 
