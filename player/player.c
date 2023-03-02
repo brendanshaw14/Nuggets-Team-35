@@ -170,7 +170,7 @@ void player_delete(player_t* player, grid_t* grid) {
     // delete this player in the playerArray in grid
     for (int i = 0; i < max_player_number + 1; i++) {
         // use address to compare the player
-        if (message_eqAddr(grid->playerArray[i]->player_address, player->player_address)) {
+        if (grid->playerArray[i] != NULL && message_eqAddr(grid->playerArray[i]->player_address, player->player_address)) {
             // set it to NULL
             grid->playerArray[i] = NULL; 
             break; 
@@ -313,7 +313,7 @@ bool player_move(player_t* player, grid_t* grid, char k) {
 static void updatePlayerArray(player_t* player, grid_t* grid) {
     for (int i = 0; i < max_player_number + 1; i++) {
         // find the correct player
-        if (message_eqAddr(grid->playerArray[i]->player_address, player->player_address)) {
+        if (grid->playerArray[i] != NULL && message_eqAddr(grid->playerArray[i]->player_address, player->player_address)) {
             // update it's position
             grid->playerArray[i] = player; 
             break; 
