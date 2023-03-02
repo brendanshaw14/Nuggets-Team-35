@@ -10,6 +10,7 @@ See player.h for detailed info.*/
 #include <math.h>
 #include "../libcs50/hashtable.h"
 #include "../grid/grid.h"
+#include "../support/message.h"
 
 #define max(x, y) (((x) > (y)) ? (x) : (y))
 #define min(x, y) (((x) < (y)) ? (x) : (y))
@@ -123,7 +124,7 @@ void player_updateSpecVisibility(player_t* player, grid_t* grid) {
     }
 } 
 
-player_t* player_init(grid_t* grid, int address, char* name, bool isSpectator, int radius) {
+player_t* player_init(grid_t* grid, addr_t address, char* name, bool isSpectator, int radius) {
     char* map = grid->gridString; 
     player_t* player = malloc(sizeof(player_t)); 
     player->player_address = address; 
@@ -169,11 +170,17 @@ void player_delete(player_t* player, grid_t* grid) {
     // delete this player in the playerArray in grid
     for (int i = 0; i < max_player_number + 1; i++) {
         // use address to compare the player
-        if (grid->playerArray[i] != NULL && grid->playerArray[i]->player_address == player->player_address) {
-            // set it to NULL 
+        if (message_eqAddr(grid->playerArray[i]->player_address, player->player_address)) {
+            // set it to NULL
             grid->playerArray[i] = NULL; 
             break; 
         }
+
+        // if (grid->playerArray[i] != NULL && grid->playerArray[i]->player_address == player->player_address) {
+        //     // set it to NULL 
+        //     grid->playerArray[i] = NULL; 
+        //     break; 
+        // }
     }
     free(player->player_name);
     free(player->player_seen);
@@ -306,11 +313,18 @@ bool player_move(player_t* player, grid_t* grid, char k) {
 static void updatePlayerArray(player_t* player, grid_t* grid) {
     for (int i = 0; i < max_player_number + 1; i++) {
         // find the correct player
-        if (grid->playerArray[i] && grid->playerArray[i]->player_address == player->player_address) {
+        if (message_eqAddr(grid->playerArray[i]->player_address, player->player_address)) {
             // update it's position
             grid->playerArray[i] = player; 
             break; 
         }
+
+
+        // if (grid->playerArray[i] && grid->playerArray[i]->player_address == player->player_address) {
+        //     // update it's position
+        //     grid->playerArray[i] = player; 
+        //     break; 
+        // }
     }
 }
 
