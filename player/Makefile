@@ -25,5 +25,8 @@ $(PROG): $(OBJS) $(LIBS)
 test: 
 	./playertest ../maps/main.txt
 
+valgrind: 
+	valgrind --leak-check=full --show-leak-kinds=all ./playertest ../maps/main.txt
+
 clean:
 	rm -f $(PROG) $(OBJS)

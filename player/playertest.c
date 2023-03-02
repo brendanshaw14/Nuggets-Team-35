@@ -62,6 +62,7 @@ int main(const int argc, const char* argv[]) {
         player_updateSpecVisibility(spectator, grid); 
         printf("current spec player \n%s\n\n", spectator->player_seen); 
     }
+    grid_delete(grid);
 
     return 0;
 }

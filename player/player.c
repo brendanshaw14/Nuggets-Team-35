@@ -22,6 +22,7 @@ const int max_player_number = 26;
 
 hashtable_t* blockCharList; 
 
+void passageVisitedDelete(void* item);
 static bool checkValidPosition(int position, char* map);
 static int isReachBound(int position, int width, int height, char bound);  
 static bool moveToNewPosition(player_t* player, int newPosition, char* map); 
@@ -186,12 +187,13 @@ void player_delete(player_t* player, grid_t* grid) {
             break; 
         }
     }
-    free(player->player_name);
-    free(player->player_seen);
-    free(player->player_passageVisited);
+    //hashtable_delete(player->player_passageVisited, passageVisitedDelete);
     return;
 }
 
+void passageVisitedDelete(void* item){
+    return;
+}
 char* player_getName(player_t* player) {
     return player->player_name; 
 }

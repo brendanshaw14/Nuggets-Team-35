@@ -23,10 +23,14 @@ $(PROG): $(OBJS) $(LIBS)
 	$(CC) $(CFLAGS) -c $< -o $@ -lm
 
 test: 
-	./gridtest ../maps/main.txt
+	./gridtest
+
+valgrind: 
+	valgrind --leak-check=full --show-leak-kinds=all ./gridtest
 
 clean:
 	rm -f $(PROG) $(OBJS)
+	rm -f *vgcore*
 
 
 
