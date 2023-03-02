@@ -67,7 +67,8 @@ bool grid_addPlayer(grid_t* grid, player_t* newPlayer);
 
 
 /**********grid_delete*********/
-/*Deletes the given grid
+/*Deletes the given grid 
+-dele
 */
 void grid_delete(grid_t* grid);
 #endif
