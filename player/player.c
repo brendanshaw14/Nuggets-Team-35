@@ -116,7 +116,6 @@ void player_updateVisibility(player_t* player, grid_t* grid) {
                     }
                     // if there's gold, we cannot show the '*' for regular player
                     if (map[index] == gold_mark) {
-                        printf("player row: %d, player col: %d, gold row: %d, gold col: %d\n", playerRow, playerCol, row, col); 
                         player->player_seen[index] = available_mark; 
                     }
                 }
@@ -345,6 +344,8 @@ bool player_move(player_t* player, grid_t* grid, char k) {
         player_updateVisibility(occupiedPlayer, grid); 
         // update the playerArray of the occupied player
         updatePlayerArray(occupiedPlayer, grid); 
+        // update the visibility of the invader
+        player_updateVisibility(player, grid); 
 
         // steal the gold
         int goldStolen = occupiedPlayer->player_amountOfGold * steal_percentage; 
