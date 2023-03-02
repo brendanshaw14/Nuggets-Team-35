@@ -15,7 +15,7 @@ See player.h for detailed info.*/
 #define max(x, y) (((x) > (y)) ? (x) : (y))
 #define min(x, y) (((x) < (y)) ? (x) : (y))
 
-const char player_mark = '*'; 
+const char player_mark = '@'; 
 const char init_seen_mark = ' '; 
 const int num_slots = 20; 
 const int max_player_number = 26; 
@@ -35,7 +35,7 @@ static bool checkHorizonal(char* map, int playerCol, int playerRow, int currCol,
 static void updateVisibilitySameCol(player_t* player, char* map, int commonCol, int currRow, int playerRow, int width); 
 static void updateVisibilitySameRow(player_t* player, char* map, int commonRow, int currCol, int playerCol, int width);
 static bool isLastPassage(player_t* player, char* map, int currIndex, int width);  
-static bool isPlayer(grid_t* grid, int position); 
+static int isPlayer(grid_t* grid, int position); 
 static void updateGoldAmount(player_t* player, grid_t* grid); 
 static void updatePlayerArray(player_t* player, grid_t* grid); 
 static char* intToString(int a); 
@@ -69,7 +69,7 @@ void player_updateVisibility(player_t* player, grid_t* grid) {
             // skip the player position
             if (row == playerRow && col == playerCol) {
                 int index = convertToIndex(row, col, width); 
-                // mark the current player itself 
+                // mark the player itself as '@' 
                 player->player_seen[index] = player_mark; 
                 continue; 
             }
@@ -82,26 +82,33 @@ void player_updateVisibility(player_t* player, grid_t* grid) {
                 updateVisibilitySameCol(player, map, col, row, playerRow, width); 
                 // if there's another player, show it
                 int index = convertToIndex(row, col, width); 
-                if (isPlayer(grid, index)) {
-                    player->player_seen[index] = player_mark; 
+                int locationInArray = isPlayer(grid, index); 
+                if (locationInArray != -1) {
+                    // set the other player as player_letter
+                    player->player_seen[index] = grid->playerArray[locationInArray]->player_letter;
                 }
             } else if (row == playerRow) {
                 // loop all cols
                 updateVisibilitySameRow(player, map, row, col, playerCol, width); 
                 // if there's another player, show it
                 int index = convertToIndex(row, col, width); 
-                if (isPlayer(grid, index)) {
-                    player->player_seen[index] = player_mark; 
+                int locationInArray = isPlayer(grid, index); 
+                if (locationInArray != -1) {
+                    // set the other player as player_letter
+                    player->player_seen[index] = grid->playerArray[locationInArray]->player_letter;
                 }
             } else {
                 // diag direction 
                 if (isRoom(col, row, playerCol, playerRow, map, width)) {
                     // current position [col, row] can be visible
                     int index = convertToIndex(row, col, width); 
+                    // set this position to be visible 
                     player->player_seen[index] = map[index]; 
                     // if there's another player in this position, show it
-                    if (isPlayer(grid, index)) {
-                        player->player_seen[index] = player_mark; 
+                    int locationInArray = isPlayer(grid, index); 
+                    if (locationInArray != -1) {
+                        // set the other player as player_letter
+                        player->player_seen[index] = grid->playerArray[locationInArray]->player_letter;
                     }
                 }
             }
@@ -116,7 +123,12 @@ void player_updateSpecVisibility(player_t* player, grid_t* grid) {
     for (int i = 0; i < strlen(map); i++) {
         if (isPlayer(grid, i)) {
             // current index is player, set it as player 
-            player->player_seen[i] = player_mark; 
+            int locationInArray = isPlayer(grid, i); 
+            if (locationInArray != -1) {
+                // set the player as player_letter
+                printf("lllllllllll, %d\n", locationInArray); 
+                player->player_seen[i] = grid->playerArray[locationInArray]->player_letter;
+            }
         } else {
             // current index is not player, set is the same as map
             player->player_seen[i] = map[i]; 
@@ -339,18 +351,20 @@ static void updateGoldAmount(player_t* player, grid_t* grid) {
     }
 }
 
-static bool isPlayer(grid_t* grid, int position) {
+// if it's a player, return it's position in the playerArray
+// otherwise, return -1 
+static int isPlayer(grid_t* grid, int position) {
     // add 1 to consider spectator 
-    for (int i = 0; i < max_player_number + 1; i++) {
-        // TODO: do we need to check spectator here? 
-        // if (grid->playerArray[i] != NULL && !grid->playerArray[i]->player_isSpectator) {
-        if (grid->playerArray[i] != NULL) {
+    int i = 0; 
+    for (i = 0; i < max_player_number + 1; i++) {
+        // need to check spectator here
+        if (grid->playerArray[i] != NULL && !grid->playerArray[i]->player_isSpectator) {
             if (position == grid->playerArray[i]->player_position) {
-                return true; 
+                return i; 
             }
         }
     }
-    return false; 
+    return -1; 
 }
 
 static bool isLastPassage(player_t* player, char* map, int currIndex, int width) {

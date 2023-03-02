@@ -150,11 +150,11 @@ bool handleMessage(void* arg, const addr_t from, const char* message){
     // 	    message_send ERROR, invalid keystroke
   } 
   // 	if goldRemaining == 0
-  else if ()
-  {
-    // 	  iterate through all players and message_send QUIT using endGame_helper
-    // 	  return true to end loop
-  }
+//   else if ()
+//   {
+//     // 	  iterate through all players and message_send QUIT using endGame_helper
+//     // 	  return true to end loop
+//   }
     
     
     

@@ -10,7 +10,7 @@ LIBS = ../libcs50/libcs50-given.a
 SRCS = grid.c ../player/player.c gridtest.c
 
 # Object files
-OBJS = grid.o ../player/player.o gridtest.o
+OBJS = grid.o ../player/player.o gridtest.o ../support/message.o ../support/log.o
 
 .PHONY: all clean
 
