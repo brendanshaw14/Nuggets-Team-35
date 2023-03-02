@@ -40,6 +40,9 @@ int main(const int argc, const char* argv[]) {
     grid_addPlayer(grid, player1); 
     grid_addPlayer(grid, spectator); 
 
+    // place the gold
+    grid_placeGold(grid, 10, 30, 250, -1);
+
     // visualize the two players initially 
     player_updateVisibility(player, grid); 
     player_updateVisibility(player1, grid); 

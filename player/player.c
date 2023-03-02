@@ -17,8 +17,11 @@ See player.h for detailed info.*/
 
 const char player_mark = '@'; 
 const char init_seen_mark = ' '; 
+const char gold_mark = '*'; 
+const char available_mark = '.'; 
 const int num_slots = 20; 
 const int max_player_number = 26; 
+const double steal_percentage = 0.5; 
 
 hashtable_t* blockCharList; 
 
@@ -111,6 +114,11 @@ void player_updateVisibility(player_t* player, grid_t* grid) {
                         // set the other player as player_letter
                         player->player_seen[index] = grid->playerArray[locationInArray]->player_letter;
                     }
+                    // if there's gold, we cannot show the '*' for regular player
+                    if (map[index] == gold_mark) {
+                        printf("player row: %d, player col: %d, gold row: %d, gold col: %d\n", playerRow, playerCol, row, col); 
+                        player->player_seen[index] = available_mark; 
+                    }
                 }
             }
         }
@@ -131,7 +139,17 @@ void player_updateSpecVisibility(player_t* player, grid_t* grid) {
             // current index is not player, set is the same as map
             player->player_seen[i] = map[i]; 
         }
+
+        // if map[index] == '*' (there used to be a gold) but there's no gold now (already collected by some players), 
+        // we should not show '*' for spectator 
+        // but if there's a player now (the player is collecting gold, we should show the player)
+        // e.g.:
+        // ..P*. -> ...P. -> ....P
+        if (counters_get(grid->goldTable, i) == 0 && map[i] == gold_mark && isPlayer(grid, i) == -1) {
+            player->player_seen[i] = available_mark; 
+        }
     }
+
 } 
 
 player_t* player_init(grid_t* grid, addr_t address, char* name, bool isSpectator, int radius, char letter) {
@@ -295,6 +313,10 @@ bool player_move(player_t* player, grid_t* grid, char k) {
         // 2. Update the player's visibility
         // 3. Update gold amount if finding a gold
         // 4. Update the playerArray
+    
+    // in the case of player switch
+    int oldPosition = player->player_position; 
+    int occupiedPlayerPosition = isPlayer(grid, newPosition); 
 
     if (moveToNewPosition(player, newPosition, map)) {
         // update the "seen" string
@@ -312,6 +334,23 @@ bool player_move(player_t* player, grid_t* grid, char k) {
         updatePlayerArray(player, grid); 
     }
 
+    // switch the player, 
+    // and update the playerArray of the occupied one, not the invader 
+    // because we've updated the playerArray of the invader above 
+    if (occupiedPlayerPosition != -1) {
+        player_t* occupiedPlayer = grid->playerArray[occupiedPlayerPosition]; 
+        // change the position of the occupied player
+        occupiedPlayer->player_position = oldPosition; 
+        // update the visibility of the occupied player 
+        player_updateVisibility(occupiedPlayer, grid); 
+        // update the playerArray of the occupied player
+        updatePlayerArray(occupiedPlayer, grid); 
+
+        // steal the gold
+        int goldStolen = occupiedPlayer->player_amountOfGold * steal_percentage; 
+        occupiedPlayer->player_amountOfGold -= goldStolen; 
+        player->player_amountOfGold += goldStolen; 
+    }
 
     return true; 
 }
@@ -395,14 +434,18 @@ static void updateVisibilitySameCol(player_t* player, char* map, int commonCol, 
     for (i = minRow + 1; i < maxRow; i++) {
         int index = convertToIndex(i, commonCol, width); 
         // if the path is not available
-        if (map[index] != '.') {
+        if (map[index] != available_mark && map[index] != gold_mark) {
             break; 
         }
     }
-    // if all dots along the path is visible
+    // if all dots along the path is visible, then current position is visible
     if (i == maxRow) {
         int index = convertToIndex(currRow, commonCol, width); 
         player->player_seen[index] = map[index]; 
+        // if there's gold, we cannot show the '*' for regular player
+        if (map[index] == gold_mark) {
+            player->player_seen[index] = available_mark; 
+        }
     }
 }
 
@@ -411,14 +454,18 @@ static void updateVisibilitySameRow(player_t* player, char* map, int commonRow, 
     int i = minCol + 1; 
     for (i = minCol + 1; i < maxCol; i++) {
         int index = convertToIndex(commonRow, i, width); 
-        if (map[index] != '.') {
+        if (map[index] != available_mark && map[index] != gold_mark) {
             break; 
         }
     }
-    // if all dots along the path is visible
+    // if all dots along the path is visible, then current position is visible
     if (i == maxCol) {
         int index = convertToIndex(commonRow, currCol, width); 
         player->player_seen[index] = map[index]; 
+        // if there's gold, we cannot show the '*' for regular player
+        if (map[index] == gold_mark) {
+            player->player_seen[index] = available_mark; 
+        }
     }
 }
 
@@ -580,7 +627,7 @@ static bool moveToNewPosition(player_t*player, int newPosition, char* map) {
 }
 
 static bool checkValidPosition(int position, char* map) {
-    if (map[position] == '.' || map[position] == '#') {
+    if (map[position] == available_mark || map[position] == '#' || map[position] == gold_mark) {
         return true; 
     } 
     return false; 
