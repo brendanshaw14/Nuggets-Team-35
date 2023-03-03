@@ -33,7 +33,6 @@ typedef struct player {
     - sets the player address, name, letter, visibility range, amount of gold found
     - initializes the player "seen" string
     - initializes a hashtable storing the passage it has visited 
-    - sets the blockCharList storing the chars that will block vision 
 Requires:
     - pointer to grid, type: grid_t*
     - address, type: addr_t
@@ -117,16 +116,55 @@ Returns:
 bool player_move(player_t* player, grid_t* grid, char k); 
 
 /***********player_updateVisibility*************/
-/* Update what this player can see.
-    TODO .....
-    - 
+/* Update what this regular player can see.
+    - a rectangle shape of range is implemented
+    - loop from [x - radius, x + radius], [y - radius, y + radius]:
+        - for each valid position,
+            - if in the same row with player:
+                - call "updateVisibilitySameRow" function to update visibility
+                - show other player if exists
+            - if in the same column with player:
+                - call "updateVisibilitySameCol" function to update visibility
+                - show other player if exists
+            - otherwise:
+                - for each reachable position (call "isRoom" to check):
+                    - "isRoom" function does: 
+                        - computes the slope of line and calls functions below to check intersection
+                        - calls "checkVertical" to check if there's any vertical wall
+                        - calls "checkHorizonal" to check if there's any horizonal wall
+                        - current position is visible if there's no both two kinds of walls 
+                    - update visibility
+                    - show other player if exists
+                    - hide gold mark '*' for regular player
 Requires:
-    - 
+    - pointer to player, type: player_t*
+    - pointer to grid, type: grid_t*
 Returns: 
-    - 
+    - None
+Note:
+    - for each position in the range, it's visible for the player only if: 
+        - there's no vertical wall during the path between player and itself
+        - there's no horizonal wall during the path between player and itself
+    - we consider "same row", "same column", "other cases" respectively here, 
+        - for the sake of any "devided by 0" error when calculating line slope
+    - some extra credit is supported here: 
+        - limited range
+        - different player can have different size of visibility range
 */
 void player_updateVisibility(player_t* player, grid_t* grid); 
 
+/***********player_updateSpecVisibility*************/
+/* Update what the spectator can see.
+    - loop the whole seen string of spectator,
+        - visualize all players
+        - if there used to be a gold but there's no gold now (already collected by some players), 
+            we hide '*' for spectator
+Requires:
+    - pointer to player, type: player_t*
+    - pointer to grid, type: grid_t*
+Returns: 
+    - None
+*/
 void player_updateSpecVisibility(player_t* player, grid_t* grid); 
 
 #endif
