@@ -23,8 +23,6 @@ const int num_slots = 20;
 const int max_player_number = 26; 
 const double steal_percentage = 0.5; 
 
-hashtable_t* blockCharList; 
-
 void passageVisitedDelete(void* item);
 static bool checkValidPosition(int position, char* map);
 static int isReachBound(int position, int width, int height, char bound);  
@@ -42,8 +40,8 @@ static bool isLastPassage(player_t* player, char* map, int currIndex, int width)
 static int isPlayer(grid_t* grid, int position); 
 static void updateGoldAmount(player_t* player, grid_t* grid); 
 static void updatePlayerArray(player_t* player, grid_t* grid); 
+static bool isBlockChar(char ch); 
 static char* intToString(int a); 
-static char* charToString(char a); 
 
 void player_updateVisibility(player_t* player, grid_t* grid) {
     char* map = grid->gridString; 
@@ -177,15 +175,6 @@ player_t* player_init(grid_t* grid, addr_t address, char* name, bool isSpectator
         // if it's spectator, we should initialize the string to be the same as the map
         strcpy(player->player_seen, map); 
     }
-    
-
-    // set the block char
-    blockCharList = hashtable_new(num_slots); 
-    hashtable_insert(blockCharList, "|", ""); 
-    hashtable_insert(blockCharList, "+", ""); 
-    hashtable_insert(blockCharList, "#", ""); 
-    hashtable_insert(blockCharList, "-", "");
-    hashtable_insert(blockCharList, " ", ""); 
 
     // // visualize the init range of player
     // player_updateVisibility(player, grid); 
@@ -356,6 +345,10 @@ bool player_move(player_t* player, grid_t* grid, char k) {
     return true; 
 }
 
+static bool isBlockChar(char ch) {
+    return ch == '|' || ch == '+' || ch == '#' || ch == '-' || ch == ' '; 
+}
+
 static void updatePlayerArray(player_t* player, grid_t* grid) {
     for (int i = 0; i < max_player_number + 1; i++) {
         // find the correct player
@@ -420,12 +413,6 @@ static bool isLastPassage(player_t* player, char* map, int currIndex, int width)
 static char* intToString(int a) {
     char* str = malloc(80);  
     sprintf(str, "%d", a); 
-    return str; 
-}
-
-static char* charToString(char a) {
-    char* str = malloc(1); 
-    str[0] = a; 
     return str; 
 }
 
@@ -501,7 +488,7 @@ static bool checkVertical(char* map, int playerCol, int playerRow, int currCol, 
             // current row is actually an int, no need to check it's neighbours
             // convert from [col, row] to index
             int index = convertToIndex(row, col, width);  
-            if (hashtable_find(blockCharList, charToString(map[index]))) {
+            if (isBlockChar(map[index])) {
                 return false; 
             }  
         } else {
@@ -510,7 +497,7 @@ static bool checkVertical(char* map, int playerCol, int playerRow, int currCol, 
             int nei1 = floor(row), nei2 = nei1 + 1; 
             // convert from (col, row) to index
             int index1 = convertToIndex(nei1, col, width), index2 = convertToIndex(nei2, col, width); 
-            if (hashtable_find(blockCharList, charToString(map[index1])) && hashtable_find(blockCharList, charToString(map[index2]))) {
+            if (isBlockChar(map[index1]) && isBlockChar(map[index2])) {
                 return false; 
             }
         }
@@ -536,13 +523,13 @@ static bool checkHorizonal(char* map, int playerCol, int playerRow, int currCol,
         // check if current col is an int or not
         if (isInteger(col)) {
             int index = convertToIndex(row, col,width); 
-            if (hashtable_find(blockCharList, charToString(map[index]))) {
+            if (isBlockChar(map[index])) {
                 return false; 
             } 
         } else {
             int nei1 = floor(col), nei2 = nei1 + 1; 
             int index1= convertToIndex(row, nei1, width), index2 = convertToIndex(row, nei2, width); 
-            if (hashtable_find(blockCharList, charToString(map[index1])) && hashtable_find(blockCharList, charToString(map[index2]))) {
+            if (isBlockChar(map[index1]) && isBlockChar(map[index2])) {
                 return false; 
             } 
         }
