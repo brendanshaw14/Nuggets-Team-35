@@ -87,6 +87,7 @@ void player_updateVisibility(player_t* player, grid_t* grid) {
         if (!isLastPassage(player, map, index, width)) {
             radius = 1; 
         }
+        free(indexStr);
     } 
 
     // loop all positions in the range [x - radius, x + radius], [y - radius, y + radius] 
@@ -214,13 +215,17 @@ void player_delete(player_t* player, grid_t* grid) {
     // delete this player in the playerArray in grid
     for (int i = 0; i < max_player_number + 1; i++) {
         // check if a player exists for that i and use address to compare the player 
-        if (grid->playerArray[i] != NULL && message_eqAddr(grid->playerArray[i]->player_address, player->player_address)) {
-            // set it to NULL
-            grid->playerArray[i] = NULL; 
-            break; 
+        if (grid->playerArray[i] != NULL){
+            if (message_eqAddr(grid->playerArray[i]->player_address, player->player_address)) {
+                // set it to NULL
+                hashtable_delete(player->player_passageVisited, NULL);
+                grid->playerArray[i] = NULL; 
+                free(player -> player_seen);
+                free(player);
+                break; 
+            }
         }
     }
-    //hashtable_delete(player->player_passageVisited, passageVisitedDelete);
     return;
 }
 
@@ -435,17 +440,37 @@ static bool isLastPassage(player_t* player, char* map, int currIndex, int width)
         *upIndexStr = intToString(upIndex), *downIndexStr = intToString(downIndex); 
 
     if (leftIndex >= 0 && map[leftIndex] == '#' && hashtable_find(player->player_passageVisited, leftIndexStr) == NULL) {
+        free(leftIndexStr);
+        free(rightIndexStr);
+        free(upIndexStr);
+        free(downIndexStr);
         return false; 
     } 
     if (rightIndex < strlen(map) && map[rightIndex] == '#' && hashtable_find(player->player_passageVisited, rightIndexStr) == NULL) {
+        free(leftIndexStr);
+        free(rightIndexStr);
+        free(upIndexStr);
+        free(downIndexStr);
         return false; 
     } 
     if (upIndex >= 0 && map[upIndex] == '#' && hashtable_find(player->player_passageVisited, upIndexStr) == NULL) {
+        free(leftIndexStr);
+        free(rightIndexStr);
+        free(upIndexStr);
+        free(downIndexStr);
         return false; 
     } 
     if (downIndex < strlen(map) && map[downIndex] == '#' && hashtable_find(player->player_passageVisited, downIndexStr) == NULL) {
+        free(leftIndexStr);
+        free(rightIndexStr);
+        free(upIndexStr);
+        free(downIndexStr);
         return false; 
     } 
+    free(leftIndexStr);
+    free(rightIndexStr);
+    free(upIndexStr);
+    free(downIndexStr);
     return true; 
 }
 

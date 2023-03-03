@@ -48,3 +48,6 @@ void findGoldSum(void* arg, const int key, const int count){
     *sum += count;
     return;
 }
+
+
+

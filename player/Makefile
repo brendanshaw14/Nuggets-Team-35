@@ -29,4 +29,5 @@ valgrind:
 	valgrind --leak-check=full --show-leak-kinds=all ./playertest ../maps/main.txt
 
 clean:
+	rm -f *vgcore*
 	rm -f $(PROG) $(OBJS)

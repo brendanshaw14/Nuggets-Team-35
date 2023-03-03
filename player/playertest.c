@@ -13,59 +13,88 @@ See player.h for detailed info.*/
 #include "../support/message.h"
 
 int main(const int argc, const char* argv[]) {
-    FILE* fp = fopen(argv[1], "r"); 
-    int width = 0, height = 0; 
+    //make the file
+    FILE* inputMap = fopen(argv[1], "r"); 
+    grid_t* grid = grid_init(inputMap);
 
-    printf("width: %d, height: %d\n", width, height); 
-
-    // create a player
+    //set player parameters
     int radius = 18; 
-    grid_t* grid = grid_init(fp); 
     addr_t* address1 = malloc(sizeof(addr_t)); 
-    addr_t* address2 = malloc(sizeof(addr_t)); 
-    addr_t* address_spec = malloc(sizeof(addr_t)); 
-
-    // set these addresses to be different manually
-    address1->sin_family = -1; 
-    address2->sin_family = 0; 
-    address_spec->sin_family = 1; 
-
+    
+    //make the player
     player_t* player = player_init(grid, *address1, "name1", false, radius, 'A'); 
-    player_t* player1 = player_init(grid, *address2, "name2", false, radius, 'B');
-    player_t* spectator = player_init(grid, *address_spec, "name_spec", true, radius, ' ');
-
-
-    // add these two players into grid (manually for now)
-    grid_addPlayer(grid, player); 
-    grid_addPlayer(grid, player1); 
-    grid_addPlayer(grid, spectator); 
-
-    // place the gold
-    grid_placeGold(grid, 10, 30, 250, -1);
-
-    // visualize the two players initially 
-    player_updateVisibility(player, grid); 
-    player_updateVisibility(player1, grid); 
-    player_updateSpecVisibility(spectator, grid); 
-
-
-    printf("player1: \n%s\n", player->player_seen); 
-    printf("player2: \n%s\n", player1->player_seen); 
-    printf("spec: \n%s\n", spectator->player_seen); 
-
-
+    //add it to the grid
+    grid_addPlayer(grid, player);
+     
+    //try moving the player
+    player_updateVisibility(player, grid);
+    printf("%s", player -> player_seen);
     char ch = '\0'; 
     while ((ch = fgetc(stdin)) != EOF) {
         if (ch == '\n')
             continue; 
         printf("curr direc: %c\n", ch); 
-        player_move(player1, grid, ch); 
-        printf("current regular player\n%s\n\n", player1->player_seen); 
-        // refresh what spectator sees 
-        player_updateSpecVisibility(spectator, grid); 
-        printf("current spec player \n%s\n\n", spectator->player_seen); 
+        player_move(player, grid, ch); 
+        printf("current regular player\n%s\n\n", player->player_seen); 
     }
+    //free the file and address
     grid_delete(grid);
-
+    fclose(inputMap);
+    free(address1);
     return 0;
 }
+
+//ABOVE IS MEM LEAK TESTING: BELOW IS PREVIOUS TESTING FOR KEY HANDLING
+    //FILE* fp = fopen(argv[1], "r"); 
+    //int width = 0, height = 0; 
+
+    //printf("width: %d, height: %d\n", width, height); 
+
+    //// create a player
+    //int radius = 18; 
+    //grid_t* grid = grid_init(fp); 
+    //addr_t* address1 = malloc(sizeof(addr_t)); 
+    //addr_t* address2 = malloc(sizeof(addr_t)); 
+    //addr_t* address_spec = malloc(sizeof(addr_t)); 
+
+    //// set these addresses to be different manually
+    //address1->sin_family = -1; 
+    //address2->sin_family = 0; 
+    //address_spec->sin_family = 1; 
+
+    //player_t* player = player_init(grid, *address1, "name1", false, radius, 'A'); 
+    //player_t* player1 = player_init(grid, *address2, "name2", false, radius, 'B');
+    //player_t* spectator = player_init(grid, *address_spec, "name_spec", true, radius, ' ');
+
+
+    //// add these two players into grid (manually for now)
+    //grid_addPlayer(grid, player); 
+    //grid_addPlayer(grid, player1); 
+    //grid_addPlayer(grid, spectator); 
+
+    //// place the gold
+    //grid_placeGold(grid, 10, 30, 250, -1);
+
+    //// visualize the two players initially 
+    //player_updateVisibility(player, grid); 
+    //player_updateVisibility(player1, grid); 
+    //player_updateSpecVisibility(spectator, grid); 
+
+
+    //printf("player1: \n%s\n", player->player_seen); 
+    //printf("player2: \n%s\n", player1->player_seen); 
+    //printf("spec: \n%s\n", spectator->player_seen); 
+
+
+    //char ch = '\0'; 
+    //while ((ch = fgetc(stdin)) != EOF) {
+        //if (ch == '\n')
+            //continue; 
+        //printf("curr direc: %c\n", ch); 
+        //player_move(player1, grid, ch); 
+        //printf("current regular player\n%s\n\n", player1->player_seen); 
+        //// refresh what spectator sees 
+        //player_updateSpecVisibility(spectator, grid); 
+        //printf("current spec player \n%s\n\n", spectator->player_seen); 
+    //}
+    //grid_delete(grid);
