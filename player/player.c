@@ -3,6 +3,7 @@ Authors: Brendan Shaw, Romeo Myrthil, Ming Cheng
 CS50- Winter 2023
 See player.h for detailed info.*/
 
+// includes
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h> 
@@ -12,9 +13,11 @@ See player.h for detailed info.*/
 #include "../grid/grid.h"
 #include "../support/message.h"
 
+// definition of "max" and "min" function
 #define max(x, y) (((x) > (y)) ? (x) : (y))
 #define min(x, y) (((x) < (y)) ? (x) : (y))
 
+// definition of constants 
 const char player_mark = '@'; 
 const char init_seen_mark = ' '; 
 const char gold_mark = '*'; 
@@ -23,26 +26,47 @@ const int num_slots = 20;
 const int max_player_number = 26; 
 const double steal_percentage = 0.5; 
 
+// delete hashtable storing visited passage for a player
 void passageVisitedDelete(void* item);
+// check whether current position is valid so that player can move to
 static bool checkValidPosition(int position, char* map);
+// check whether current position reaches the boundary of the map
 static int isReachBound(int position, int width, int height, char bound);  
+// move the player
 static bool moveToNewPosition(player_t* player, int newPosition, char* map); 
+// return the row number of current position
 static int getRow(int position, int width); 
+// return the column number of current position
 static int getCol(int position, int width); 
+// check whether a floating number is actually equal to an int
 static bool isInteger(double a); 
+// check whether current position is a room (
+    // not blocked by walls during the path from it to player)
 static bool isRoom(int currCol, int currRow, int playerCol, int playerRow, char* map, int width); 
+// convert from [row, col] to index in the map
 static int convertToIndex(int row, int col, int width); 
+// check vertical walls existence
 static bool checkVertical(char* map, int playerCol, int playerRow, int currCol, int currRow, int width, double k); 
+// check horizonal walls existence
 static bool checkHorizonal(char* map, int playerCol, int playerRow, int currCol, int currRow, int width, double k); 
+// update the visibility when the position is at the same column with player
 static void updateVisibilitySameCol(player_t* player, char* map, int commonCol, int currRow, int playerRow, int width); 
+// update the visibility when the position is at the same row with player
 static void updateVisibilitySameRow(player_t* player, char* map, int commonRow, int currCol, int playerCol, int width);
+// check whether it's the last passage
 static bool isLastPassage(player_t* player, char* map, int currIndex, int width);  
+// check whether current position is a player
 static int isPlayer(grid_t* grid, int position); 
+// update amount of gold by current player
 static void updateGoldAmount(player_t* player, grid_t* grid); 
+// update the playerArray in grid
 static void updatePlayerArray(player_t* player, grid_t* grid); 
+// check if char is one of the following: '|', '+', '#', '-', ' '
 static bool isBlockChar(char ch); 
+// convert from int to string
 static char* intToString(int a); 
 
+// see player.h for more information
 void player_updateVisibility(player_t* player, grid_t* grid) {
     char* map = grid->gridString; 
     int width = grid->numColumns, height = grid->numRows, radius = player->player_visibility_range; 
@@ -122,6 +146,7 @@ void player_updateVisibility(player_t* player, grid_t* grid) {
     }
 }
 
+// see player.h for more information
 void player_updateSpecVisibility(player_t* player, grid_t* grid) {
     // as for the spectator, it should show all players in the map
     char* map = grid->gridString; 
@@ -149,6 +174,7 @@ void player_updateSpecVisibility(player_t* player, grid_t* grid) {
 
 } 
 
+// see player.h for more information
 player_t* player_init(grid_t* grid, addr_t address, char* name, bool isSpectator, int radius, char letter) {
     char* map = grid->gridString; 
     player_t* player = malloc(sizeof(player_t)); 
@@ -183,6 +209,7 @@ player_t* player_init(grid_t* grid, addr_t address, char* name, bool isSpectator
     return player; 
 }
 
+// see player.h for more information
 void player_delete(player_t* player, grid_t* grid) {
     // delete this player in the playerArray in grid
     for (int i = 0; i < max_player_number + 1; i++) {
@@ -197,25 +224,32 @@ void player_delete(player_t* player, grid_t* grid) {
     return;
 }
 
+// delete the visited passage of current player
 void passageVisitedDelete(void* item){
     return;
 }
+
+// return player name
 char* player_getName(player_t* player) {
     return player->player_name; 
 }
 
+// return player position
 int player_getPosition(player_t* player) {
     return player->player_position; 
 } 
 
+// return amount of gold player has found
 int player_getGold(player_t* player) {
     return player->player_amountOfGold; 
 } 
 
+// return "seen" string of player
 char* player_getVisibility(player_t* player) {
     return player->player_seen; 
 }
 
+// move the player
 bool player_move(player_t* player, grid_t* grid, char k) {
     char* map = grid->gridString; 
     int width = grid->numColumns, height = grid->numRows; 
@@ -345,10 +379,12 @@ bool player_move(player_t* player, grid_t* grid, char k) {
     return true; 
 }
 
+// check if char is one of the following: '|', '+', '#', '-', ' '
 static bool isBlockChar(char ch) {
     return ch == '|' || ch == '+' || ch == '#' || ch == '-' || ch == ' '; 
 }
 
+// update the playerArray in grid
 static void updatePlayerArray(player_t* player, grid_t* grid) {
     for (int i = 0; i < max_player_number + 1; i++) {
         // find the correct player
@@ -360,6 +396,7 @@ static void updatePlayerArray(player_t* player, grid_t* grid) {
     }
 }
 
+// update amount of gold by current player
 static void updateGoldAmount(player_t* player, grid_t* grid) {
     int amountOfGold = counters_get(grid->goldTable, player->player_position); 
     if (amountOfGold > 0) {
@@ -370,6 +407,7 @@ static void updateGoldAmount(player_t* player, grid_t* grid) {
     }
 }
 
+// check whether current position is a player
 // if it's a player, return it's position in the playerArray
 // otherwise, return -1 
 static int isPlayer(grid_t* grid, int position) {
@@ -385,6 +423,7 @@ static int isPlayer(grid_t* grid, int position) {
     return -1; 
 }
 
+// check whether it's the last passage
 static bool isLastPassage(player_t* player, char* map, int currIndex, int width) {
     // check 4 directions
     // if there's at least 1 direction is '#' (not previously seen), return false
@@ -410,12 +449,14 @@ static bool isLastPassage(player_t* player, char* map, int currIndex, int width)
     return true; 
 }
 
+// convert from int to string
 static char* intToString(int a) {
     char* str = malloc(80);  
     sprintf(str, "%d", a); 
     return str; 
 }
 
+// update the visibility when the position is at the same column with player
 static void updateVisibilitySameCol(player_t* player, char* map, int commonCol, int currRow, int playerRow, int width) {
     int minRow = min(currRow, playerRow), maxRow = max(currRow, playerRow); 
     int i = minRow + 1; 
@@ -437,6 +478,7 @@ static void updateVisibilitySameCol(player_t* player, char* map, int commonCol, 
     }
 }
 
+// update the visibility when the position is at the same row with player
 static void updateVisibilitySameRow(player_t* player, char* map, int commonRow, int currCol, int playerCol, int width) {
     int minCol = min(currCol, playerCol), maxCol = max(currCol, playerCol); 
     int i = minCol + 1; 
@@ -457,6 +499,8 @@ static void updateVisibilitySameRow(player_t* player, char* map, int commonRow, 
     }
 }
 
+// check whether current position is a room (
+    // not blocked by walls during the path from it to player)
 static bool isRoom(int currCol, int currRow, int playerCol, int playerRow, char* map, int width) {
     double k = (playerRow - currRow + 0.0) / (playerCol - currCol + 0.0); 
 
@@ -466,6 +510,7 @@ static bool isRoom(int currCol, int currRow, int playerCol, int playerRow, char*
     return vertical && horizonal; 
 }
 
+// check vertical walls existence
 static bool checkVertical(char* map, int playerCol, int playerRow, int currCol, int currRow, int width, double k) {
 
     int startCol = 0, endCol = 0, startRow = 0; 
@@ -505,6 +550,7 @@ static bool checkVertical(char* map, int playerCol, int playerRow, int currCol, 
     return true; 
 }
 
+// check horizonal walls existence
 static bool checkHorizonal(char* map, int playerCol, int playerRow, int currCol, int currRow, int width, double k) {
     int startRow = 0, endRow = 0, startCol = 0; 
 
@@ -537,24 +583,29 @@ static bool checkHorizonal(char* map, int playerCol, int playerRow, int currCol,
     return true; 
 }
 
+// convert from [row, col] to index in the map
 static int convertToIndex(int row, int col, int width) {
     return row * width + col; 
 }
 
+// check whether a floating number is actually equal to an int
 static bool isInteger(double a) {
     int b = a; 
     double diff = a - b; 
     return diff == 0; 
 }
 
+// return the row number of current position
 static int getRow(int position, int width) {
     return position / width; 
 }
 
+// return the column number of current position
 static int getCol(int position, int width) {
     return position % width;  
 }
 
+// check whether current position reaches the boundary of the map
 static int isReachBound(int position, int width, int height, char bound) {
     // consider '\n' before computing
     width++; 
@@ -601,6 +652,7 @@ static int isReachBound(int position, int width, int height, char bound) {
     return -1; 
 }
 
+// move the player
 static bool moveToNewPosition(player_t*player, int newPosition, char* map) {
     // if new position is reachable, then move to it
     // otherwise, do nothing
@@ -614,6 +666,7 @@ static bool moveToNewPosition(player_t*player, int newPosition, char* map) {
     return false; 
 }
 
+// check whether current position is valid so that player can move to
 static bool checkValidPosition(int position, char* map) {
     if (map[position] == available_mark || map[position] == '#' || map[position] == gold_mark) {
         return true; 

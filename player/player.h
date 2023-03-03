@@ -15,6 +15,7 @@ CS50- Winter 2023*/
 /****************global types**************/
 typedef struct grid grid_t;
 
+// defintion of player structure
 typedef struct player {
     addr_t player_address; 
     int player_position; 
