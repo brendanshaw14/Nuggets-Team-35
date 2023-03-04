@@ -24,15 +24,17 @@ The server interacts with the client by allowing clients to join, creating struc
 
 ### Definition of function prototypes
 
-> For function, provide a brief description and then a code block with its function prototype.
-> For example:
 
-#### `parseArgs`- A function to parse the command-line arguments, initialize the game struct, initialize the message module, and (BEYOND SPEC) initialize analytics module.
+#### `parseArgs`
+
+A function to parse the command-line arguments, initialize the game struct, initialize the message module, and (BEYOND SPEC) initialize analytics module.
 
 ```c
 static int parseArgs(const int argc, char* argv[]);
 ```
-#### `initializeGame`- A funciton to inialize the grid module and the game structure's members. 
+#### `initializeGame`
+
+A funciton to inialize the grid module and the game structure's members. 
 ```c
 bool initializeGame(const int argc, char* argv[]);
 ```
@@ -59,7 +61,7 @@ The function `initializeGame` takes the arguments validated by parseArgs to full
 
 #### `message_loop`
 
-The function `message_loop` given to us by the message.c file in the support folder, provides us with the ability to wait for messages sent to the server by the client. The function takes 3 helper functions as arguments and the implementation of these will be described below.
+The function `message_loop` given to us by the `message.c` file in the support folder, provides us with the ability to wait for messages sent to the server by the client. The function takes 3 helper functions as arguments and the implementation of these will be described below.
 
 ##### `handleTimeout`
 
@@ -264,7 +266,7 @@ Makes sure that the player is in a valid position.
 	else:
 		return false
 
-#### updateVisibilities_helper
+#### `updateVisibilities_helper`
 
 A helper function for hashtable iterate, for updating every players visibility and sending it to their clients
 
@@ -273,7 +275,7 @@ A helper function for hashtable iterate, for updating every players visibility a
 	player->player_seen = that new visibility
 	message_send DISPLAY\nplayer->player_seen
 
-#### updateGoldStatus_helper
+#### `updateGoldStatus_helper`
 
 A helper function for hashtable iterate, for sending out a message about the goldStatus to every player
 
@@ -281,7 +283,7 @@ A helper function for hashtable iterate, for sending out a message about the gol
 	message_send GOLD n p r 
 	where n is the nuggets just picked up, p is players total nuggets, and r is remaining on the map
 
-#### endGame_helper
+#### `endGame_helper`
 
 A helper function for hashtable iterate, for helping each client quit the game 
 
@@ -335,8 +337,12 @@ bool grid_addPlayer(grid_t* gid, player_t* player);
 ```
 ### Detailed pseudo code
 
-#### `grid_init` - loads the grid object from a map.txt file
+#### `grid_init`
+
+This function loads the grid object from a map.txt file
+
 Pseudocode:
+
 	make a new grid object
 	make new hashtable with 26 spots
 	set the numRows and numColumns variables in the new grid to represent the map
@@ -345,8 +351,12 @@ Pseudocode:
 		add the new line character at the end 
 	return the grid
 
-#### `grid_placeGold` - loads the gold piles into the map randomly
+#### `grid_placeGold` 
+
+This function loads the gold piles into the map randomly
+
 Pseudocode:
+
 	create a new counter for the gold
 	if there is a seed given, call srand(seed), otherwise call srand(getpid())
 	find the how much gold per pile if we have the max number of piles 
@@ -364,8 +374,12 @@ Pseudocode:
 			follow the same process for adding as above
 	return true
 
-#### `grid_addPlayer` - takes a player struct and adds it to the map
+#### `grid_addPlayer`
+
+This function takes a player struct and adds it to the map
+
 Pseudocode:
+
 	copy that player into the grid's player hashtable
 	put that player into the random location on the map
 	initialize any other player parameters
