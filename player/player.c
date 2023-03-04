@@ -110,7 +110,8 @@ void player_updateVisibility(player_t* player, grid_t* grid) {
                 // if there's another player, show it
                 int index = convertToIndex(row, col, width); 
                 int locationInArray = isPlayer(grid, index); 
-                if (locationInArray != -1) {
+                // if there's an activate player
+                if (locationInArray != -1 && grid->playerArray[locationInArray]->player_isActivate) {
                     // set the other player as player_letter
                     player->player_seen[index] = grid->playerArray[locationInArray]->player_letter;
                 }
@@ -120,7 +121,8 @@ void player_updateVisibility(player_t* player, grid_t* grid) {
                 // if there's another player, show it
                 int index = convertToIndex(row, col, width); 
                 int locationInArray = isPlayer(grid, index); 
-                if (locationInArray != -1) {
+                // if there's an activate player
+                if (locationInArray != -1 && grid->playerArray[locationInArray]->player_isActivate) {
                     // set the other player as player_letter
                     player->player_seen[index] = grid->playerArray[locationInArray]->player_letter;
                 }
@@ -133,7 +135,8 @@ void player_updateVisibility(player_t* player, grid_t* grid) {
                     player->player_seen[index] = map[index]; 
                     // if there's another player in this position, show it
                     int locationInArray = isPlayer(grid, index); 
-                    if (locationInArray != -1) {
+                    // if there's an activate player
+                    if (locationInArray != -1 && grid->playerArray[locationInArray]->player_isActivate) {
                         // set the other player as player_letter
                         player->player_seen[index] = grid->playerArray[locationInArray]->player_letter;
                     }
@@ -150,7 +153,8 @@ void player_updateSpecVisibility(player_t* player, grid_t* grid) {
     // loop the whole seen string, and visualize all players 
     for (int i = 0; i < strlen(map); i++) {
         int locationInArray = isPlayer(grid, i); 
-        if (locationInArray != -1) {
+        // if there's an activate player
+        if (locationInArray != -1 && grid->playerArray[locationInArray]->player_isActivate) {
             // current index is player, set it as player 
             // set the player as player_letter
             player->player_seen[i] = grid->playerArray[locationInArray]->player_letter;
@@ -172,18 +176,19 @@ void player_updateSpecVisibility(player_t* player, grid_t* grid) {
 } 
 
 // see player.h for more information
-player_t* player_init(grid_t* grid, addr_t address, char* name, bool isSpectator, int radius, char letter) {
+player_t* player_init(grid_t* grid, addr_t address, const char* name, bool isSpectator, int radius, char letter) {
     char* map = grid->gridString; 
     player_t* player = malloc(sizeof(player_t)); 
     player->player_address = address; 
-    player->player_position = 0; 
-    player->player_name = name; 
+    player->player_position = 0; // TODO: MAY WANT TO CHANGE THIS
+    player->player_name = (char*)name; 
     player->player_amountOfGold = 0;
     player->player_passageVisited = hashtable_new(num_slots);  
     player->player_isSpectator = isSpectator;  
     player->player_visibility_range = radius; 
     player->player_seen = malloc(strlen(map) +1); 
     player->player_letter = letter;
+    player->player_isActivate = true; // set the player to be activate initially
     // initialize player_seen string
     if (!isSpectator) {
         // if it's a regular player, we should initialize the string as empty
