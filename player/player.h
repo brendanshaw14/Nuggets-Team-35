@@ -45,7 +45,7 @@ Requires:
 Returns: 
     - a pointer to player
 */
-player_t* player_init(grid_t* grid, addr_t address, char* name, bool isSpectator, int radius, char letter); 
+player_t* player_init(grid_t* grid, addr_t address, const char* name, bool isSpectator, int radius, char letter); 
 
 /***********player_delete*************/
 /* Delete a player.
