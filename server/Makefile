@@ -3,14 +3,20 @@
 
 # Compiler and flags
 CC = gcc
-CFLAGS=-Wall -pedantic -std=c11 -ggdb -I ../suppprt -L ../support -lsupport 
+CFLAGS=-Wall -pedantic -std=c11 -ggdb -I ../support -L ../support -lsupport -I ../libcs50 -I. -L../libcs50 -lcs50-given
 PROG = server
 
 all: $(PROG)
 
-server: server.c libsupport.a
-	$(CC) -o $@ $< $(CFLAGS)
+# Object files
+OBJS = server.o ../player/player.o ../grid/grid.o 
+LIBS = ../support/libsupport.a ../libcs50/libcs50-given.a
 
-libsupport.a:
-	cd ../support; make
+server: $(OBJS) $(LIBS) 
+	$(CC) $(CFLAGS) $^ -o $@ -lm
 
+%.o: %.c $(LIBS)
+	$(CC) $(CFLAGS) -c $< -o $@ -lm
+
+clean:
+	rm -f $(PROG) $(OBJS)
