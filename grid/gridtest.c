@@ -17,7 +17,7 @@ void findGoldSum(void* arg, const int key, const int count);
 
 int main(const int argc, const char* argv[]){
     FILE* map;
-    //test grid_init
+    //test grid_init: make some grids
     printf("\nLoading the main map:");
     map = fopen("../maps/main.txt", "r");
     grid_t* grid = grid_init(map);

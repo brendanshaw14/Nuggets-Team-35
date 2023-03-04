@@ -16,6 +16,7 @@ int main(const int argc, const char* argv[]) {
     //make the file
     FILE* inputMap = fopen(argv[1], "r"); 
     grid_t* grid = grid_init(inputMap);
+    grid_placeGold(grid, 10, 30, 250, -1);
 
     //set player parameters
     int radius = 18; 
