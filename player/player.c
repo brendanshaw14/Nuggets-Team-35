@@ -153,6 +153,7 @@ void player_updateSpecVisibility(player_t* player, grid_t* grid) {
         if (locationInArray != -1) {
             // current index is player, set it as player 
             // set the player as player_letter
+            printf("index of a player.... %d\n", locationInArray); 
             player->player_seen[i] = grid->playerArray[locationInArray]->player_letter;
         } else {
             // current index is not player, set is the same as map
@@ -184,6 +185,7 @@ player_t* player_init(grid_t* grid, addr_t address, char* name, bool isSpectator
     player->player_visibility_range = radius; 
     player->player_seen = malloc(strlen(map)); 
     player->player_letter = letter;
+    player->player_isActivate = true; // set the player to be activate initially
     // initialize player_seen string
     if (!isSpectator) {
         // if it's a regular player, we should initialize the string as empty

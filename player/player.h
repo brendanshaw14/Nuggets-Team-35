@@ -26,6 +26,7 @@ typedef struct player {
     hashtable_t* player_passageVisited; 
     bool player_isSpectator; 
     char player_letter;
+    bool player_isActivate; 
 } player_t; 
 
 /***********player_init*************/
