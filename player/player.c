@@ -186,7 +186,7 @@ player_t* player_init(grid_t* grid, addr_t address, const char* name, bool isSpe
     player->player_passageVisited = hashtable_new(num_slots);  
     player->player_isSpectator = isSpectator;  
     player->player_visibility_range = radius; 
-    player->player_seen = malloc(strlen(map)); 
+    player->player_seen = malloc(strlen(map) +1); 
     player->player_letter = letter;
     player->player_isActivate = true; // set the player to be activate initially
     // initialize player_seen string

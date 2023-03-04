@@ -31,6 +31,7 @@ grid_t* grid_init(FILE* inputMap){
     }
     //initialize the new grid structs
     grid_t* grid = mem_malloc(sizeof(grid_t)); //make a new grid
+    grid->goldTable = counters_new();
     //set variables to their defaults
     grid -> numPlayers = 0;
     grid -> goldRemaining = 250;
@@ -43,16 +44,16 @@ grid_t* grid_init(FILE* inputMap){
     char* firstLine = file_readLine(inputMap); 
     grid -> numColumns = strlen(firstLine);
     //make the grid string and initialize empty!
-    grid -> gridString = mem_malloc((grid -> numColumns + 1) * grid -> numRows + 1); 
+    grid -> gridString = mem_malloc((grid -> numColumns + 2) * grid -> numRows + 1); 
     grid -> gridString[0] = '\0';
     char* nextLine; 
     //put the first line in    
-    strcat(firstLine, "\n");
     strcat(grid -> gridString, firstLine);
+    strcat(grid -> gridString, "\n");
     //read through the lines of the map, adding the null terminator and pasting them into the gridString
     while ((nextLine = file_readLine(inputMap)) != NULL){
-        strcat(nextLine, "\n");
         strcat(grid -> gridString, nextLine);
+        strcat(grid -> gridString, "\n");
         mem_free(nextLine);
     }
     mem_free(firstLine);
@@ -69,7 +70,6 @@ while not all the pieces have been added
 when the last piece is reached before 250, add the remaining gold to that pile
 */
 bool grid_placeGold(grid_t* grid, int minPiles, int maxPiles, int GoldTotal, int seed){
-    grid -> goldTable = counters_new();
     int goldPlaced = 0;
     int pilesPlaced = 0;
     int minPerPile = (GoldTotal/maxPiles);
@@ -138,7 +138,7 @@ void grid_delete(grid_t* grid){
         player_delete(grid -> playerArray[i], grid);
     }
     //free the counters
-    counters_delete(grid -> goldTable);
+    counters_delete(grid->goldTable);
     //free the grid string 
     mem_free(grid->gridString);
     //free the grid
