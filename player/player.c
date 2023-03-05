@@ -59,6 +59,8 @@ static bool isLastPassage(player_t* player, char* map, int currIndex, int width)
 static int isPlayer(grid_t* grid, int position); 
 // update amount of gold by current player
 static void updateGoldAmount(player_t* player, grid_t* grid); 
+// // check if current index is out of player's visibility
+static bool isOutOfRange(int playerRow, int playerCol, int radius, int currentIndex); 
 // update the playerArray in grid
 static void updatePlayerArray(player_t* player, grid_t* grid); 
 // check if char is one of the following: '|', '+', '#', '-', ' '
@@ -142,6 +144,15 @@ void player_updateVisibility(player_t* player, grid_t* grid) {
                     }
                 }
             }
+        }
+    }
+
+    // loop all positions in grid, and remove the other player when it's out of visibility
+    for (int index = 0; index < strlen(player->player_seen); index++) {
+        // if it's a valid position (because isPlayer function does not consider spec and spec position is 0 which is invalid), 
+        // and there's player at that pos, and that pos is out of range
+        if (isOutOfRange(playerRow, playerCol, radius, index) && isPlayer(grid, index) && checkValidPosition(index, grid->gridString)) {
+            player->player_seen[index] = grid->gridString[index];  // set it to be '.' or '#'
         }
     }
 }
@@ -386,6 +397,15 @@ bool player_move(player_t* player, grid_t* grid, char k) {
 // check if char is one of the following: '|', '+', '#', '-', ' '
 static bool isBlockChar(char ch) {
     return ch == '|' || ch == '+' || ch == '#' || ch == '-' || ch == ' '; 
+}
+
+// check if current index is out of player's visibility
+static bool isOutOfRange(int playerRow, int playerCol, int radius, int currentIndex) {
+    if (currentIndex < playerRow - radius || currentIndex > playerRow + radius 
+        || currentIndex < playerCol - radius || currentIndex > playerCol + radius) {
+            return true; 
+        }
+    return false; 
 }
 
 // update the playerArray in grid
