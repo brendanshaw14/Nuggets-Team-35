@@ -68,7 +68,11 @@ bool grid_addPlayer(grid_t* grid, player_t* newPlayer);
 
 /**********grid_delete*********/
 /*Deletes the given grid 
--dele
+    -calls player_delete() on each player in the grid's playerArray
+    -deletes the grid counter
+    -frees the gridString
+    -frees the grid
+Note: This should only be called after calling placeGold to make the gold counter
 */
 void grid_delete(grid_t* grid);
 #endif
