@@ -21,6 +21,7 @@ static const int GoldTotal = 250;      // amount of gold in the game
 static const int GoldMinNumPiles = 10; // minimum number of gold piles
 static const int GoldMaxNumPiles = 30; // maximum number of gold piles
 static const int PLAYER_RADIUS = 5;    // player visibility radius
+const int SPEC_IDX = 26; // the index of spectator. 26 because the length of the array is 26 + 1. array counts from slot 0-26
 
 
 //function headers:
@@ -159,33 +160,17 @@ bool handleMessage(void* arg, const addr_t from, const char* message){
     // char displayMessage[(gameGrid->numRows * gameGrid->numColumns) + strlen("DISPLAY\n") + 1];
     char* displayMessage = malloc(strlen(newPlayer->player_seen) + 10);
     displayMessage[strlen(newPlayer->player_seen) + 9] = '\0';
-    // char displayString[10] = "DISPLAY\n";
-    // displayString[9] = '\0'; 
-    // strcat(displayMessage, displayString); 
-    // strcat(displayMessage, newPlayer->player_seen);
-    // strcpy(displayMessage, "DISPLAY\n"); 
-    // strcpy(displayMessage + strlen("DISPLAY\n"), actualDisplay);
 
     sprintf(displayMessage, "DISPLAY\n%s", newPlayer->player_seen);
-
-    
-
     message_send(from, displayMessage);
 
     free(displayMessage);
   } 
 
-  printf("\n\n\n\nentering spectate\n");
-  printf("\n\n\n\n%shello\n\n", message);
-
     //  if message is SPECTATE
   if (strncmp(message, "SPECTATE", strlen("SPECTATE")) == 0)
   {
-    const char* content = message + strlen("SPECTATE");
-    
-
-    // 26 because the length of the array is 26 + 1. array counts from slot 0-26
-    const int SPEC_IDX = 26; 
+    const char* content = message + strlen("SPECTATE"); 
 
     // c boolean for whether there is a spectator already
     int specExisted = 0;
@@ -210,17 +195,20 @@ bool handleMessage(void* arg, const addr_t from, const char* message){
       gameGrid->playerArray[SPEC_IDX] = newSpec;
     } // do i need to do more in here?
 
+    // show the grid 
+    char rowsAndColumnsMessage[100];
+    sprintf(rowsAndColumnsMessage, "GRID %d %d", gameGrid->numRows, gameGrid->numColumns);
+    message_send(from, (const char*)rowsAndColumnsMessage);
 
-      //  sending the visibility to spec
+    // sending the visibility to spec
     player_updateSpecVisibility(gameGrid->playerArray[SPEC_IDX], gameGrid);
-    char displayMessage[(gameGrid->numRows * gameGrid->numColumns) + strlen("DISPLAY\n") + 1];
+    // char displayMessage[(gameGrid->numRows * gameGrid->numColumns) + strlen("DISPLAY\n") + 1];
+    char* displayMessage = malloc(strlen(gameGrid->playerArray[SPEC_IDX]->player_seen) + 10);
+    displayMessage[strlen(gameGrid->playerArray[SPEC_IDX]->player_seen) + 9] = '\0';
     sprintf(displayMessage, "DISPLAY\n%s", gameGrid->playerArray[SPEC_IDX]->player_seen);
 
-
-    
-    printf("\n\n\n\n\n%s\n\n\n\n\n", displayMessage);
-
     message_send(from, (const char*)displayMessage);
+    free(displayMessage);
   }
     //  if message is KEY
   if (strncmp(message, "KEY ", strlen("KEY ")) == 0)
