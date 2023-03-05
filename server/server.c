@@ -21,6 +21,7 @@ static const int GoldTotal = 250;      // amount of gold in the game
 static const int GoldMinNumPiles = 10; // minimum number of gold piles
 static const int GoldMaxNumPiles = 30; // maximum number of gold piles
 static const int PLAYER_RADIUS = 5;    // player visibility radius
+static const int TIME_TIL_TIMEOUT = 100;  // seconds until the server timesout
 const int SPEC_IDX = 26; // the index of spectator. 26 because the length of the array is 26 + 1. array counts from slot 0-26
 
 
@@ -32,7 +33,6 @@ bool handleMessage(void* arg, const addr_t from, const char* message);
 bool handleInput(void* arg);
 static char assignLetter(int arrayIdx);
 
-void findGoldSum(void* arg, const int key, const int count);  //remove later after done testing
 
 
 /********************Main******************/
@@ -44,7 +44,7 @@ int main(const int argc, const char* argv[]){
     //initialize the message stream
     message_init(stderr);
     //loop through messages
-    message_loop(grid, 1000, handleTimeout, handleInput, handleMessage);
+    message_loop(grid, TIME_TIL_TIMEOUT, handleTimeout, handleInput, handleMessage);
     //end the message stream
     message_done();
 
@@ -96,8 +96,19 @@ grid_t* initializeGame(const int argc, const char* argv[]){
 
 //handle timeout starter function
 bool handleTimeout(void* arg){
+    grid_t* gameGrid = arg;
+
+    for (int i = 0; i < MaxPlayers+1; i++) {
+
+      if (gameGrid->playerArray[i] != NULL){
+        char quitMessage[50];  // no message should have to be over lentgh 100. we can change this
+        sprintf(quitMessage, "QUIT Server timed out: No action in %d seconds", TIME_TIL_TIMEOUT);
+        message_send(gameGrid->playerArray[i]->player_address, (const char*)quitMessage);
+      }
+    }
+    grid_delete(gameGrid);
+    
     return true;
-    // need to do stuff here
 }
 
 //handle input starter function
@@ -213,12 +224,9 @@ bool handleMessage(void* arg, const addr_t from, const char* message){
     //  if message is KEY
   if (strncmp(message, "KEY ", strlen("KEY ")) == 0)
   {
-    // printf("\n\n\n\n\n\n\nbabababdhjakjbjkadfkbadf\n\n\n\n\n");
+    
     counters_print(gameGrid->goldTable, stdout);
-    // int sumGold = 0;
-    // counters_iterate(gameGrid -> goldTable, &sumGold, findGoldSum);
-    // printf("goldsum = %d", sumGold);
-
+    
 
     const char* content = message + strlen("KEY ");
 
@@ -327,7 +335,17 @@ bool handleMessage(void* arg, const addr_t from, const char* message){
       } else {
           // int to keep track of how big new pile of gold is
         int goldCollected = movingPlayer->player_amountOfGold - goldBeforeMove;
-        gameGrid->goldRemaining -= goldCollected;
+        
+        printf("\n\n\n\n%d\n\n\n", goldCollected);
+
+        int goldPickedUp = 0;
+        for (int i = 0; i < MaxPlayers+1; i++) {
+          if (gameGrid->playerArray[i] != NULL) {
+            goldPickedUp += gameGrid->playerArray[i]->player_amountOfGold;
+          }
+        }
+        printf("\n\n\n%d\n\n\n", goldPickedUp);
+        gameGrid->goldRemaining = GoldTotal - goldPickedUp;
 
           // send the updated gold message to player who picked up gold
         char goldMessage[100];
@@ -459,14 +477,4 @@ static char assignLetter(int arrayIdx) {
   }
 }
 
-
-
-// TESTING!!!!!!!!!!!!!!!!!!!!!!! remove later
-
-// finds the sum of all gold values placed into the gold counters
-void findGoldSum(void* arg, const int key, const int count){
-    int* sum = arg;
-    *sum += count;
-    return;
-}
 
