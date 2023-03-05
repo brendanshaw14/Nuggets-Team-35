@@ -59,12 +59,16 @@ static bool isLastPassage(player_t* player, char* map, int currIndex, int width)
 static int isPlayer(grid_t* grid, int position); 
 // update amount of gold by current player
 static void updateGoldAmount(player_t* player, grid_t* grid); 
+// // check if current index is out of player's visibility
+static bool isOutOfRange(int playerRow, int playerCol, int radius, int currentIndex, int width); 
 // update the playerArray in grid
 static void updatePlayerArray(player_t* player, grid_t* grid); 
 // check if char is one of the following: '|', '+', '#', '-', ' '
 static bool isBlockChar(char ch); 
 // convert from int to string
 static char* intToString(int a); 
+// check if a position is a player letter
+static bool checkPlayerLetter(char ch); 
 
 // see player.h for more information
 void player_updateVisibility(player_t* player, grid_t* grid) {
@@ -144,6 +148,13 @@ void player_updateVisibility(player_t* player, grid_t* grid) {
             }
         }
     }
+
+    // loop all positions in grid, and remove the other player when it's out of visibility
+    for (int index = 0; index < strlen(player->player_seen); index++) {
+        if (isOutOfRange(playerRow, playerCol, radius, index, width) && player->player_seen[index] != init_seen_mark && checkPlayerLetter(player->player_seen[index])) {
+            player->player_seen[index] = grid->gridString[index];  // set it to be '.' or '#'
+        }
+    }
 }
 
 // see player.h for more information
@@ -186,7 +197,7 @@ player_t* player_init(grid_t* grid, addr_t address, const char* name, bool isSpe
     player->player_passageVisited = hashtable_new(num_slots);  
     player->player_isSpectator = isSpectator;  
     player->player_visibility_range = radius; 
-    player->player_seen = malloc(strlen(map) +1); 
+    player->player_seen = malloc(strlen(map) + 1); 
     player->player_letter = letter;
     player->player_isActivate = true; // set the player to be activate initially
     // initialize player_seen string
@@ -388,6 +399,16 @@ static bool isBlockChar(char ch) {
     return ch == '|' || ch == '+' || ch == '#' || ch == '-' || ch == ' '; 
 }
 
+// check if current index is out of player's visibility
+static bool isOutOfRange(int playerRow, int playerCol, int radius, int currentIndex, int width) {
+    int currRow = getRow(currentIndex, width), currCol = getCol(currentIndex, width); 
+    if (currRow < playerRow - radius || currRow > playerRow + radius 
+        || currCol < playerCol - radius || currCol > playerCol + radius) {
+            return true; 
+    }
+    return false; 
+}
+
 // update the playerArray in grid
 static void updatePlayerArray(player_t* player, grid_t* grid) {
     for (int i = 0; i < max_player_number + 1; i++) {
@@ -409,6 +430,7 @@ static void updateGoldAmount(player_t* player, grid_t* grid) {
         // set current gold to be 0
         counters_set(grid->goldTable, player->player_position, 0); 
         grid -> gridString[player -> player_position] = available_mark;
+        grid->goldRemaining -= amountOfGold; 
     }
 }
 
@@ -688,5 +710,17 @@ static bool checkValidPosition(int position, char* map) {
     if (map[position] == available_mark || map[position] == '#' || map[position] == gold_mark) {
         return true; 
     } 
+    return false; 
+}
+
+// check if a position is a player letter
+static bool checkPlayerLetter(char ch) {
+    if (ch >= 'A' && ch <= 'Z') {
+        return true; 
+    }
+    if (ch == ' ') {
+        // spectator
+        return true; 
+    }
     return false; 
 }
