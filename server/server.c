@@ -126,8 +126,6 @@ bool handleMessage(void* arg, const addr_t from, const char* message){
       return false;  // i believe returning false will continue the loop. not sure
     }
 
-
-
       // add a check if players name is empty then send the error message
       // QUIT Sorry - you must provide player's name.
     if (strlen(content) > MaxNameLength) {
@@ -136,33 +134,14 @@ bool handleMessage(void* arg, const addr_t from, const char* message){
       return false;
     }
 
-
-
     char playerLetter = assignLetter(gameGrid->numPlayers);
 
       // initializing player if there was room for more players
     player_t* newPlayer = player_init(gameGrid, from, content, false, PLAYER_RADIUS, playerLetter);  // 5 for radius. not set.
 
     grid_addPlayer(gameGrid, newPlayer);
-    // i believe i still have to increment num players
+      // i believe i still have to increment num players.  REMOVE THIS COMMENT
     gameGrid->numPlayers++;
-
-    // printf("\ngrid information\n");
-    // printf("goldremaining: %d\n", gameGrid->goldRemaining);
-    // printf("\nprinting nformation about the player after it is created\n");
-    // printf("player letter is: %c\n", newPlayer->player_letter);
-    // printf("player name is: %s\n", newPlayer->player_name);
-    // printf("player position is: %d\n", newPlayer->player_position);
-    // printf("player visibility radius is: %d\n", newPlayer->player_visibility_range);
-   
-  
-
-
-
-    // // inserting player to player array before incrementing amount of players since player 1 will be at spot 0.
-    // gameGrid->playerArray[gameGrid->numPlayers] == newPlayer;
-    // gameGrid->numPlayers++;
-    
     
       // message_send OK letter, where letter is the assigned letter
     char letterMessage[100];  // no message should have to be over lentgh 100. we can change this
@@ -196,16 +175,22 @@ bool handleMessage(void* arg, const addr_t from, const char* message){
     free(displayMessage);
   } 
 
+  printf("\n\n\n\nentering spectate\n");
+  printf("\n\n\n\n%shello\n\n", message);
+
     //  if message is SPECTATE
-  if (strncmp(message, "SPECTATE ", strlen("SPECTATE ")) == 0)
+  if (strncmp(message, "SPECTATE", strlen("SPECTATE")) == 0)
   {
-    const char* content = message + strlen("SPECTATE ");
+    const char* content = message + strlen("SPECTATE");
     
+
     // 26 because the length of the array is 26 + 1. array counts from slot 0-26
     const int SPEC_IDX = 26; 
-    bool specExisted = false;
 
+    // c boolean for whether there is a spectator already
+    int specExisted = 0;
 
+    // checking if there is a player at the spectator index
     if (gameGrid->playerArray[SPEC_IDX] != NULL) {
       player_t* currSpectator = gameGrid->playerArray[SPEC_IDX];
         // making sure it is a spectator
@@ -215,12 +200,12 @@ bool handleMessage(void* arg, const addr_t from, const char* message){
           // inserting a new spectator at that index
         player_t* newSpec = player_init(gameGrid, from, content, true, 0, ' ');  // no letter for spectator. will not be used
         gameGrid->playerArray[SPEC_IDX] = newSpec;
-        specExisted = true;
+        specExisted = 1;
       }
     }
     
 
-    if (!specExisted) {
+    if (specExisted == 0) {
       player_t* newSpec = player_init(gameGrid, from, content, true, 0, ' ');  // no letter for spectator. will not be used
       gameGrid->playerArray[SPEC_IDX] = newSpec;
     } // do i need to do more in here?
@@ -230,13 +215,17 @@ bool handleMessage(void* arg, const addr_t from, const char* message){
     player_updateSpecVisibility(gameGrid->playerArray[SPEC_IDX], gameGrid);
     char displayMessage[(gameGrid->numRows * gameGrid->numColumns) + strlen("DISPLAY\n") + 1];
     sprintf(displayMessage, "DISPLAY\n%s", gameGrid->playerArray[SPEC_IDX]->player_seen);
+
+
+    
     printf("\n\n\n\n\n%s\n\n\n\n\n", displayMessage);
-    message_send(gameGrid->playerArray[SPEC_IDX]->player_address, (const char*)displayMessage);
+
+    message_send(from, (const char*)displayMessage);
   }
     //  if message is KEY
   if (strncmp(message, "KEY ", strlen("KEY ")) == 0)
   {
-    printf("\n\n\n\n\n\n\nbabababdhjakjbjkadfkbadf\n\n\n\n\n");
+    // printf("\n\n\n\n\n\n\nbabababdhjakjbjkadfkbadf\n\n\n\n\n");
     counters_print(gameGrid->goldTable, stdout);
     // int sumGold = 0;
     // counters_iterate(gameGrid -> goldTable, &sumGold, findGoldSum);
@@ -245,7 +234,7 @@ bool handleMessage(void* arg, const addr_t from, const char* message){
 
     const char* content = message + strlen("KEY ");
 
-    printf("\n\n\n\n\n\n\ncontent should be here!!!!!!!!!!!! %s\n\n\n\n\n\n", content);
+    // printf("\n\n\n\n\n\n\ncontent should be here!!!!!!!!!!!! %s\n\n\n\n\n\n", content);
 
       // finding the player the move is attempted on
     player_t* movingPlayer;                                 // change this variable name
@@ -263,12 +252,15 @@ bool handleMessage(void* arg, const addr_t from, const char* message){
       }
     }
 
-    
+    // movingPlayer->player_isSpectator is uninitialised for some reason
     bool isSpectator = movingPlayer->player_isSpectator;
-    printf("\n\n\n\n\n\n\ncontent should be here!!!!!!!!!!!! %s\n\n\n\n\n\n", content);
+
+    // printf("\n\n\n\n\n\n\ncontent should be here!!!!!!!!!!!! %s\n\n\n\n\n\n", content);
 
     if (isSpectator) {
+
       printf("\n\n%s\n\n", content);
+
       if (strcmp(content, "Q") == 0) {
           // quitting the spectator
         message_send(from, "QUIT Thanks for watching!");
@@ -279,6 +271,7 @@ bool handleMessage(void* arg, const addr_t from, const char* message){
       } else {
         printf("\n\n\n\n\nshould print something\n\n\n\n\n");
         message_send(from, "ERROR Invalid keystroke: Spectators can't move");
+        return false;
       }
     }
     
@@ -326,6 +319,8 @@ bool handleMessage(void* arg, const addr_t from, const char* message){
             sprintf(displayMessage, "DISPLAY\n%s", gameGrid->playerArray[i]->player_seen);
             message_send(gameGrid->playerArray[i]->player_address, (const char*)displayMessage);
 
+
+
           // only sending a message if the player is still active
           } else if (gameGrid->playerArray[i]->player_isActivate){
 
@@ -337,6 +332,8 @@ bool handleMessage(void* arg, const addr_t from, const char* message){
             char displayMessage[(gameGrid->numRows * gameGrid->numColumns) + strlen("DISPLAY\n") + 1];
             sprintf(displayMessage, "DISPLAY\n%s", gameGrid->playerArray[i]->player_seen);
             message_send(gameGrid->playerArray[i]->player_address, (const char*)displayMessage);
+
+  
           }
         }
       } else {
