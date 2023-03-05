@@ -15,11 +15,8 @@ See grid.h for detailed info.*/
 #include "../player/player.h"
 
 /****************file-local global variables*/
-static const int MaxNameLength = 50;   // max number of chars in playerName
 static const int MaxPlayers = 26;      // maximum number of players
 static const int GoldTotal = 250;      // amount of gold in the game
-static const int GoldMinNumPiles = 10; // minimum number of gold piles
-static const int GoldMaxNumPiles = 30; // maximum number of gold piles
 
 static bool addPlayerInArray(grid_t* grid, player_t* player); 
 
@@ -34,7 +31,7 @@ grid_t* grid_init(FILE* inputMap){
     grid->goldTable = counters_new();
     //set variables to their defaults
     grid -> numPlayers = 0;
-    grid -> goldRemaining = 250;
+    grid -> goldRemaining = GoldTotal;
     // initialize the player to be NULL
     for (int i = 0; i < MaxPlayers + 1; i++) {
         grid->playerArray[i] = NULL; 
@@ -99,11 +96,17 @@ bool grid_placeGold(grid_t* grid, int minPiles, int maxPiles, int GoldTotal, int
         }
     }
     //place the final pile
-    index = rand() % (grid -> numColumns * grid -> numRows) + 1; //get a random index in the map
-    goldInPile = GoldTotal - goldPlaced;
-    counters_set(grid -> goldTable, index, goldInPile);
-    goldPlaced += goldInPile;
-    pilesPlaced ++;
+    while (goldPlaced != GoldTotal){
+        index = rand() % (grid -> numColumns * grid -> numRows) + 1; //get a random index in the map
+        currentChar = grid -> gridString[index];
+        //search until a room spot is found, place the last pile there
+        if (currentChar == '.'){
+            goldInPile = GoldTotal - goldPlaced;
+            counters_set(grid -> goldTable, index, goldInPile);
+            goldPlaced += goldInPile;
+            pilesPlaced ++;
+        }
+    }
     return true;
 }
 
