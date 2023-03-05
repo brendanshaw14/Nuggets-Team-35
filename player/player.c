@@ -430,6 +430,7 @@ static void updateGoldAmount(player_t* player, grid_t* grid) {
         // set current gold to be 0
         counters_set(grid->goldTable, player->player_position, 0); 
         grid -> gridString[player -> player_position] = available_mark;
+        grid->goldRemaining -= amountOfGold; 
     }
 }
 
