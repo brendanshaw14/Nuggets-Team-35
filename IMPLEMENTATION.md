@@ -25,39 +25,50 @@ The server interacts with the client by allowing clients to join, creating struc
 ### Definition of function prototypes
 
 
-#### `parseArgs`
-
-A function to parse the command-line arguments, initialize the game struct, initialize the message module, and (BEYOND SPEC) initialize analytics module.
-
-```c
-static int parseArgs(const int argc, char* argv[]);
-```
 #### `initializeGame`
 
 A funciton to inialize the grid module and the game structure's members. 
+
 ```c
-bool initializeGame(const int argc, char* argv[]);
+grid_t* initializeGame(const int argc, const char* argv[]);
+```
+
+#### `handleMessage`
+
+A function to handle message from the client.
+
+```c
+bool handleMessage(void* arg, const addr_t from, const char* message); 
+```
+
+#### `handleTimeout`
+
+A function to handle timeout.
+
+```c
+bool handleTimeout(void* arg); 
+```
+
+#### `main`
+
+Main function.
+
+```c
+int main(const int argc, const char* argv[]); 
 ```
 
 ### Detailed pseudo code
-
-#### `parseArgs`:
-
-	validate commandline
-	verify map file can be opened for reading
-	if seed provided
-		verify it is a valid seed number
-		save the seed	
-	else
-		save -1 	
 
 #### `initializeGame`
 
 The function `initializeGame` takes the arguments validated by parseArgs to fully initialize the game structure within the server, as well as the grid module. 
 
-	initialize the game struct and its members
-	call grid init 
-	initialize the network
+	check if input args are valid, 
+	initialize the grid 
+		if seed is provided, 
+			place the gold by calling `grid_placeGold` function
+		else, 
+			place the gold by calling `grid_placeGold` function with seed as -1 
 
 #### `message_loop`
 
@@ -127,29 +138,38 @@ We implement a `Player` module to store the information of player/client.
 We define a `Player` structure to represent a player. 
 ```c
 typedef struct player {
-    int player_address; 
+    addr_t player_address; 
     int player_position; 
     char* player_name; 
     int player_amountOfGold; 
+    int player_visibility_range; 
     char* player_seen; 
-} player_t;
+    hashtable_t* player_passageVisited; 
+    bool player_isSpectator; 
+    char player_letter;
+    bool player_isActivate; 
+} player_t; 
 ```
 
 Currently, a `player` structure contains the following: 
-- `player_address`: an integer representing player's address
+- `player_address`: a structure with type of `addr_t` representing player's address
 - `player_position`: an integer representing player's position
 - `player_name`: a string representing player's name
 - `player_amountOfGold`: an integer representing the amount of gold that current player has found
-- `player_seen`: a string representing the player's current visibility
-
+- `player_visibility_range`: an integer representing how much a player sees
+- `player_seen`: a string representing the player's current visibility (what it already saw)
+- `player_passageVisited`: a hashtable storing the passages that a player has visited. We use it to check whether the current passage is the last one because the player will have different range of visibility when it reaches the last passage.
+- `player_isSpectator`: a boolean variable representing whether a player is a spectator or not.
+- `player_letter`: a char representing a player's letter, from 'A' to 'Z'.
+- `player_isActivate`: a boolean variable representing whether current player is activate or not.
 
 ### Definition of function prototypes
 
 ```c
-player_t* player_init(char* map, int address, int init_position, char* name, bool isSpectator); 
+player_t* player_init(grid_t* grid, addr_t address, const char* name, bool isSpectator, int radius, char letter); 
 ```
 
-`player_init` function is used to initialize a player.
+`player_init` function is used to initialize a player. 
 
 ```c
 char* player_getName(player_t* player); 
@@ -176,13 +196,13 @@ char* player_getVisibility(player_t* player);
 `player_getVisibility` function is used to print the current visible map of the player.
 
 ```c
-void player_updateVisibility(player_t* player, char* map, int width, double radius); 
+void player_updateVisibility(player_t* player, grid_t* grid);
 ```
-`player_updateVisibility` function is used to update the visible range when player moves.
+`player_updateVisibility` function is used to update the visible range (what this player sees) when player moves.
 
 
 ```c
-bool player_move(player_t* player, char k, int width, int height, char* map, double radius);
+bool player_move(player_t* player, grid_t* grid, char k); 
 ```
 
 `player_move` function is used to move the player (update the player's position), and calls `player_updateVisibility` function to update the visible range.
@@ -192,43 +212,85 @@ bool player_move(player_t* player, char k, int width, int height, char* map, dou
 
 #### `player_init`:
 
-Initializes a player structure, setting default values and the players name, address, and info, calls the `grid_addPlayerMethod`.
+Initializes a player structure, setting default values, e.g.: the players name, address, radius, letter, spectator status, and other information.
 
 	allocate space for the structure
-	set initial value of variables in the structure
-	set the initial value of player_seen string
-	set the default player values
-	add the player to the grid (grid_addPlayer)
+	set player address
+	set initial player position (a place-holder here, we'll allocate the actual position in `grid_addPlayer` in grid module)
+	set player name
+	define an intital hashtable storing the passages that a player has visited
+	set the spectator status (whether it's a player)
+	set the initial amount of gold of this player
+	set the visibility range of this player
+	set the player letter
+	set the player to be activate 
+	set the initial value of "player_seen" string
 
 #### `player_updateVisibility`
 
 Retrieves the player's current visibility screen. 
 
 	get the current position of player
+	if player is in the passage, check if it's the last passage:
+		if so, 
+			do nothing
+		else:
+			set the player visibility range to be 1 (because the player can only see the next position when it's in the middle passage)
 	loop for all positions in the map:
-		for each position, compute the distance between it and player
-		if the distance is less than radius:
-			set it to be visible (map[position])
-	set the new player position to '*' to mark it's a player
+		for each position 'p', if it's within the range:
+			if 'p' is current player,
+				show the '@' for this player
+			else if 'p' is in the same row as the player, 
+				if all the positions between 'p' and this player are valid, 
+					set 'p' to be visible
+			else if 'p' is in the same column as the player, 
+				if all the positions between 'p' and this player are valid, 
+					set 'p' to be visible 
+			else (it's in diag direction):
+				for each reachable position (call "isRoom" to check):
+					"isRoom" function does: 
+						computes the slope of line and calls functions below to check intersection
+						calls "checkVertical" to check if there`s any vertical wall
+						calls "checkHorizonal" to check if there`s any horizonal wall
+						current position is visible if there`s no both two kinds of walls 
+					update visibility
+					show other player if exists
+	loop all positions in the map:
+		if there is a player out of visibility range, 
+			reset it (cannot show player letter)
+
 
 #### `player_move`
 
 Moves the player on the grid given the input key.
 
-	check the input key, if it's valid:
+	as for input key: 
 		check whether current position reaches bound
-		if so: 
+		if so, we cannot move to the new position
 			directly return true
 		else：
 			move to new position:
 				check if new position is able to move to
 				if so: 
-					update the player's position, return true
+					update the player's position
+					update the player's "seen" string
+					return true
 				else:
 					return false
 			if `moveToNewPosition` returns `true`: 
-			update the player's visibility
-			update the amount of gold if new position is gold
+				check if it's a spectator:
+					if so, 
+						update spectator's visibility 
+					else:
+						update player's visibility
+						update the amount of gold of this player
+				update the playerArray because we change the player's position
+		if two players are next to each other (we need to switch the two player):
+			change the position of the occupied player
+			update the visibility of the occupied player 
+			update the playerArray of the occupied player
+			update the visibility of the invader
+			steal the gold
 		return true
 	else:
 		return false
@@ -261,37 +323,65 @@ Move the player to new position. Update the `player_seen` string and `player_pos
 
 #### `checkValidPosition`
 Makes sure that the player is in a valid position. 
-	if current position is '.' or '#':
+
+	if current position is '.' or '#' or '*':
 		return true
 	else:
 		return false
 
-#### `updateVisibilities_helper`
+#### `isPlayer`
+Check whether there's a player in that position
 
-A helper function for hashtable iterate, for updating every players visibility and sending it to their clients
+	loop all entries in the `playerArray`:
+		compare the position to check if there's a player in this position
+		if so,
+			return the entry of `playerArray`
+		else, 
+			return -1
 
-	player_t player = item
-	update player visibility
-	player->player_seen = that new visibility
-	message_send DISPLAY\nplayer->player_seen
+#### `isLastPassage`
+Check whether the passage is the last one. Because the player will have different range of visibility when it reaches the last passage (It should see more).
 
-#### `updateGoldStatus_helper`
+	check all four directions, 
+	if there's at least 1 direction is '#' (and it's not previously seen), 
+		return false
+	else, 
+		return true
 
-A helper function for hashtable iterate, for sending out a message about the goldStatus to every player
+#### `isRoom`
+Check whether current position is a "room", which is not blocked by walls during the path from it to player.
 
-	player_t player = item
-	message_send GOLD n p r 
-	where n is the nuggets just picked up, p is players total nuggets, and r is remaining on the map
+	computes the slope of line and calls functions below to check intersection
+	calls "checkVertical" to check if there`s any vertical wall
+	calls "checkHorizonal" to check if there`s any horizonal wall
+	current position is visible if there`s no both two kinds of walls 
 
-#### `endGame_helper`
+#### `checkVertical`
+Check vertical walls existence
 
-A helper function for hashtable iterate, for helping each client quit the game 
+	loop all columns between current position and the player, 
+		compute the row number (intersection between the line and the grid)
+		if the row number is an int, 
+			check whether that row is valid
+		else, 
+			use `floor` function to check two neighbours
+			check whether two neighbours are valid
 
-	player_t player = item
-	hashtable_t players = arg
-	message_send QUIT for that player
-	delete player from players
-	free player
+#### `checkHorizonal`
+Check horizonal walls existence
+
+	loop all rows between current position and the player, 
+		compute the column number (intersection between the line and the grid)
+		if the column number is an int, 
+			check whether that column is valid
+		else, 
+			use `floor` function to check two neighbours
+			check whether two neighbours are valid
+
+#### `checkPlayerLetter` 
+Check whether current char is a player letter
+
+	return true if it is between A -> Z or it's a spectator
 
 ---
 ## Grid
@@ -300,8 +390,8 @@ The grid module holds most of the important data for the game, including the map
 
 ```c
 typedef struct grid {
-	char* gridString;
-    hashtable_t* playerTable;
+    char* gridString;
+    player_t* playerArray[27]; 
     counters_t* goldTable;
     int numRows;
     int numColumns;
@@ -312,7 +402,7 @@ typedef struct grid {
 
 Currently, a `grid` structure contains the following: 
 - `gridString`: a string representing the entire map
-- `playerTable`: a hashtable of player objects representing the players in the game
+- `playerArray`: an array to store all players 
 - `goldTable`: a counters object that holds the indexes of gold piles and how much gold is in that pile
 - `numRows`: an integer representing the number of rows in the map
 - `numColumns`: an integer representing the number of columns in the map
@@ -328,12 +418,12 @@ grid_t* grid_init(FILE* inputMap);
 
 #### `grid_placeGold`- places the gold piles randomly in the map
 ```c
-bool grid_placeGold(grid_t* grid, int minPiles, int maxPiles, int seed);
+bool grid_placeGold(grid_t* grid, int minPiles, int maxPiles, int goldTotal, int seed);
 ```
 
 #### `grid_addPlayer`- Adds a player to the grid
 ```c
-bool grid_addPlayer(grid_t* gid, player_t* player);
+bool grid_addPlayer(grid_t* grid, player_t* newPlayer);
 ```
 ### Detailed pseudo code
 
@@ -344,7 +434,8 @@ This function loads the grid object from a map.txt file
 Pseudocode:
 
 	make a new grid object
-	make new hashtable with 26 spots
+	make new array with 26 spots
+	set the remaining gold to be `GoldTotal`
 	set the numRows and numColumns variables in the new grid to represent the map
 	loop through each line of the file
 		add that line to the grid's map string
@@ -380,11 +471,31 @@ This function takes a player struct and adds it to the map
 
 Pseudocode:
 
-	copy that player into the grid's player hashtable
+	copy that player into the grid's player array
 	put that player into the random location on the map
-	initialize any other player parameters
-	generate the player's letter and display it on the map
+	initialize any other player parameters, e.g.: player's position
+
+#### `grid_delete`
+
+This function deletes the grid as well as all players. 
+
+	loop all players in the playerArray
+		delete the player
+	delete the counter: goldTable
+	delete the map: gridString
+	delete the grid
+
+#### `addPlayerInArray`
+
+This is the helper function to add a player in grid.
 	
+	loop all entries in the playerArray,
+		if there's an empty spot, 
+			add the player in this spot
+			return true 
+		else, 
+			return false
+
 ---
 
 ## Testing plan
@@ -392,7 +503,25 @@ Pseudocode:
 To test the grid, we will use first a series of unit tests, then integration testing with just the server module, and finally system testing with the server and client. 
 
 ### unit testing
-The unit tests will be executed using the gridtest.c program in the grid directory, where we will handle edge cases and error handling. 
+
+#### player
+
+We test the player as follows:
+
+- Test `player_init` function to create a player.
+- Test `player_updateVisibility` by moving the player through keyboard, both available spots and walls 
+- Test `player_updateSpecVisibility` by creating a spectator and show its visibility
+- Test `player_move` to by moving the player through keyboard, both available spots and walls 
+
+#### grid
+
+We test the grid as follows: 
+
+The grid functions were tested in the `gridtest.c` file:
+- create a grid 
+- place some gold
+- print out the grid table
+- add player into grid 
 
 ### integration testing
 Then the integration tests will be done likely by observing behavior of the server run with the grid. 
