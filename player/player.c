@@ -192,7 +192,8 @@ player_t* player_init(grid_t* grid, addr_t address, const char* name, bool isSpe
     player_t* player = malloc(sizeof(player_t)); 
     player->player_address = address; 
     player->player_position = 0; // TODO: MAY WANT TO CHANGE THIS
-    player->player_name = (char*)name; 
+    player->player_name = malloc(50);
+    strcpy(player-> player_name, (char*)name);
     player->player_amountOfGold = 0;
     player->player_passageVisited = hashtable_new(num_slots);  
     player->player_isSpectator = isSpectator;  
