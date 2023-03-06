@@ -85,88 +85,88 @@ We also anticipate the use of two helper modules for our server, `Grid` and `Pla
 
 The server will run as follows:
 
-	execute from a command line per the requirement spec
-	parse the command line, validate parameters
-	call initializeGame() to set up data structures	
-		create a hashtable of players
-		load the map into a grid
-		distribute gold randomly into the map
-	call message_init to initialize the 'message' module
-	print the port number on which we wait
-	call message_loop(), to await clients, passing it our helper functions, and wait for messages
-	for each message: 
-		call message handle (see below)	
-	call gameOver() to inform all clients the game has ended
-	clean up
+    execute from a command line per the requirement spec
+    parse the command line, validate parameters
+    call initializeGame() to set up data structures 
+        create a hashtable of players
+        load the map into a grid
+        distribute gold randomly into the map
+    call message_init to initialize the 'message' module
+    print the port number on which we wait
+    call message_loop(), to await clients, passing it our helper functions, and wait for messages
+    for each message: 
+        call message handle (see below) 
+    call gameOver() to inform all clients the game has ended
+    clean up
 
 
 #### main
 
 
-	execute from a command line per the requirement spec
-	parse the command line, validate parameters
-	call initializeGame() to set up data structures
-	initialize the 'message' module
-	print the port number on which we wait
-	call message_loop(), to await clients, passing it our helper functions
-	call gameOver() to inform all clients the game has ended
-	clean up
+    execute from a command line per the requirement spec
+    parse the command line, validate parameters
+    call initializeGame() to set up data structures
+    initialize the 'message' module
+    print the port number on which we wait
+    call message_loop(), to await clients, passing it our helper functions
+    call gameOver() to inform all clients the game has ended
+    clean up
 
 #### parseArgs
 
 
-	ensure that the mapFile is readable
-	if there is a seed, save it
+    ensure that the mapFile is readable
+    if there is a seed, save it
 
 #### initializeGame
 
 
-	load the grid from the mapFile, create a string to represent the grid
-	create the player hashtable 
-	initialize the player struct
+    load the grid from the mapFile, create a string to represent the grid
+    create the player hashtable 
+    initialize the player struct
 
 #### gameOver
 
 
-	send the quit message to all clients, along with the reason
+    send the quit message to all clients, along with the reason
 
 #### handleTimeout
 
 
-	if the given amount of time passes without a message, close the server
+    if the given amount of time passes without a message, close the server
 
 #### handleMessage
 
 
-	if the message is PLAY
-		create a new Player struct, initialize its values, and add it to the hashtable
-		make sure the player can join and that their name is valid
-		set the player's position randomly and add the player to the grid 
-		store their name, send the OK <L> message to the client
-		send the GRID message to send nrows and ncolumns
-	if the message is SPECTATE
-		if there is already a spectator
-			remove the current spectator
-			create a new Player struct, initialize its values, add it to the hashtable
-			store their name, send the message to the client
-		change the players mode to spectate
-		send them the whole display
-	if the message is KEY
-		if the message is from a player
-			if it is a move key
-				move the player (will use helper functions)
-				send each client their display (with visibility)
-				if the player got gold too
-					update the amount of gold that this player has found
-					if that is the max amount of gold, quit the game
-					otherwise send the GOLD message to all clients (including updated numbers for spectators)
-			if it is an invalid key
-				send an error message, ignore the keystroke
-		if the message is from a spectator
-			make sure it's q 
-			quit 
-	if all the gold was collected, quit the game
-	send the updated display message to all clients
+    if the message is PLAY
+        create a new Player struct, initialize its values, and add it to the hashtable
+        make sure the player can join and that their name is valid
+        set the player's position randomly and add the player to the grid 
+        store their name, send the OK <L> message to the client
+        send the GRID message to send nrows and ncolumns
+    if the message is SPECTATE
+        if there is already a spectator
+            remove the current spectator
+            create a new Player struct, initialize its values, add it to the hashtable
+            store their name, send the message to the client
+        change the players mode to spectate
+        send them the whole display
+    if the message is KEY
+        if the message is from a player
+            if it is a move key
+                move the player (will use helper functions)
+                send each client their display (with visibility)
+                if the player got gold too
+                    update the amount of gold that this player has found
+                    if that is the max amount of gold, quit the game
+                    otherwise send the GOLD message to all clients (including updated numbers for spectators)
+            if it is an invalid key
+                send an error message, ignore the keystroke
+        if the message is from a spectator
+            make sure it's q 
+            quit 
+    if all the gold was collected, quit the game
+    send the updated display message to all clients
 
 
 ### Major data structures
@@ -185,11 +185,11 @@ The player module aims to collect and manage the information of all players.
 It mainly contains the following:
 ```c
 struct Player {
-	int player_address;
-	int player_position; 
-	char* player_name; 
-	int player_amountOfGold; 
-	char* player_seen;  
+    int player_address;
+    int player_position; 
+    char* player_name; 
+    int player_amountOfGold; 
+    char* player_seen;  
 }; 
 ```
 
@@ -231,23 +231,23 @@ The definition of this function is `void player_getVisibility(char* player_seen,
 ### Pseudo code for logic/algorithmic flow
 
 #### player_getName
-	return Player->player_name; 
+    return Player->player_name; 
 
 #### player_getPosition
-	return Player->player_position; 
+    return Player->player_position; 
 
 #### player_getGold
-	return Player->player_amountOfGold; 
+    return Player->player_amountOfGold; 
 
 #### player_move
-	if input char is not valid:
-		return false; 
-	else, parse the char:
-		if new position is not accessable (e.g. wall, spaces):
-			return true; 
-		else: 
-			update the player's position
-			return true; 
+    if input char is not valid:
+        return false; 
+    else, parse the char:
+        if new position is not accessable (e.g. wall, spaces):
+            return true; 
+        else: 
+            update the player's position
+            return true; 
 
 
 
@@ -255,10 +255,10 @@ The definition of this function is `void player_getVisibility(char* player_seen,
 #### player_getVisibility
 
 ```c
-	initialize the "player_seen" string with empty spaces
-	loop for all chars in the string: 
-		if the distance between current char and the player is smaller than the visibility range:
-			update current char
+    initialize the "player_seen" string with empty spaces
+    loop for all chars in the string: 
+        if the distance between current char and the player is smaller than the visibility range:
+            update current char
 ```
 
 
@@ -273,13 +273,13 @@ The grid module ultimately stores and maintains the game map itself, containing 
 It mainly contains the following:
 ```c
 struct Grid {
-	char* grid;
-	Int width;
-	Int height;
-	Int numPlayers;
-	hashtable_t* players; 
-	int goldTotalLeft; 
-	hashtable_t* goldLocation;
+    char* grid;
+    Int width;
+    Int height;
+    Int numPlayers;
+    hashtable_t* players; 
+    int goldTotalLeft; 
+    hashtable_t* goldLocation;
 }; 
 ```
 
@@ -293,26 +293,26 @@ struct Grid {
 
 #### grid_init
 ```c
-	loop through lines in map.txt
-	  add lines to char*
-	  for each line that is read, add +1 to height
-	get width by dividing length of string by height
+    loop through lines in map.txt
+      add lines to char*
+      for each line that is read, add +1 to height
+    get width by dividing length of string by height
 ```
 
 #### grid_placeGold
 ```c
-	initialize hashtable
-	loop while goldplaced != goldTotal
+    initialize hashtable
+    loop while goldplaced != goldTotal
       get a random index in grid string
-	  check if index is valid position
-		get a random int newGoldPile between goldMin and goldMax
-		if goldplaced + newGoldPile < goldTotal
-		  insert in hashtable
+      check if index is valid position
+        get a random int newGoldPile between goldMin and goldMax
+        if goldplaced + newGoldPile < goldTotal
+          insert in hashtable
 ```
 
 #### grid_getGoldLeft
 ```c
-	return gridStruct->goldTotalLeft
+    return gridStruct->goldTotalLeft
 ```
 
 ## Testing Plan
