@@ -12,6 +12,12 @@ all: $(PROG)
 OBJS = server.o ../player/player.o ../grid/grid.o 
 LIBS = ../support/libsupport.a ../libcs50/libcs50-given.a
 
+test: server 
+	./server ../maps/small.txt
+
+valgrind: server
+	valgrind --leak-check=full --show-leak-kinds=all --track-origins=yes ./server ../maps/small.txt
+
 server: $(OBJS) $(LIBS) 
 	$(CC) $(CFLAGS) $^ -o $@ -lm
 
@@ -20,3 +26,4 @@ server: $(OBJS) $(LIBS)
 
 clean:
 	rm -f $(PROG) $(OBJS)
+	rm -f vgcore.*
