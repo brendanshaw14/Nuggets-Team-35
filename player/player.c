@@ -192,7 +192,8 @@ player_t* player_init(grid_t* grid, addr_t address, const char* name, bool isSpe
     player_t* player = malloc(sizeof(player_t)); 
     player->player_address = address; 
     player->player_position = 0; // TODO: MAY WANT TO CHANGE THIS
-    player->player_name = (char*)name; 
+    player->player_name = malloc(50);
+    strcpy(player-> player_name, (char*)name);
     player->player_amountOfGold = 0;
     player->player_passageVisited = hashtable_new(num_slots);  
     player->player_isSpectator = isSpectator;  
@@ -230,6 +231,7 @@ void player_delete(player_t* player, grid_t* grid) {
                 hashtable_delete(player->player_passageVisited, NULL);
                 grid->playerArray[i] = NULL; 
                 free(player -> player_seen);
+                free(player -> player_name);
                 free(player);
                 break; 
             }

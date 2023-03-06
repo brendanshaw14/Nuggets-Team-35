@@ -53,6 +53,7 @@ grid_t* grid_init(FILE* inputMap){
         strcat(grid -> gridString, "\n");
         mem_free(nextLine);
     }
+    fclose(inputMap);
     mem_free(firstLine);
     mem_free(nextLine);
     return grid;
