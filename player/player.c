@@ -231,6 +231,7 @@ void player_delete(player_t* player, grid_t* grid) {
                 hashtable_delete(player->player_passageVisited, NULL);
                 grid->playerArray[i] = NULL; 
                 free(player -> player_seen);
+                free(player -> player_name);
                 free(player);
                 break; 
             }

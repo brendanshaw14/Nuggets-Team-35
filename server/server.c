@@ -39,7 +39,6 @@ static char assignLetter(int arrayIdx);
 /* Psuedocode:
 */
 int main(const int argc, const char* argv[]){
-    
     grid_t* grid = initializeGame(argc, argv);
     //initialize the message stream
     message_init(stderr);
@@ -47,7 +46,6 @@ int main(const int argc, const char* argv[]){
     message_loop(grid, TIME_TIL_TIMEOUT, handleTimeout, handleInput, handleMessage);
     //end the message stream
     message_done();
-
     return 0;
 }
 
@@ -65,11 +63,11 @@ NOTE: THIS METHOD ACCEPTS EXTRANEOUS CHARACTERS INCLUDED IN THE SEED ARGUMENT SO
 
 grid_t* initializeGame(const int argc, const char* argv[]){
     //hold the seed and map
+    FILE* map;
     int seed = -1;
     //if one or two args were provided
     if (argc == 2 || argc == 3){
         //test the map is openeable for reading
-        FILE* map;
         map = fopen(argv[1], "r");
         //if not opened, print error and exit non-zero
         if (map == NULL){
@@ -354,6 +352,7 @@ bool handleMessage(void* arg, const addr_t from, const char* message){
   if (gameGrid->goldRemaining == 0) {
     // get the end game stats
     char* endGameStats = malloc(3000);
+    endGameStats[0] = '\0';
     //loop through the player array
     for (int i = 0; i < (MaxPlayers + 1); i++) {
       //if the player exists
@@ -362,10 +361,12 @@ bool handleMessage(void* arg, const addr_t from, const char* message){
         if (!gameGrid->playerArray[i]->player_isSpectator) {
           player_t* currentPlayer = gameGrid->playerArray[i];
           char* playerStats = malloc(100);  // needs to be longer, but this is def overkill
+          playerStats[0] = '\0';
           printf("\nPLAYERS NAME: %s", currentPlayer -> player_name);
           sprintf(playerStats, "%c   %d %s\n", currentPlayer->player_letter, currentPlayer->player_amountOfGold, currentPlayer->player_name);
           printf("\n\n\n********%s, %s********\n\n\n", currentPlayer->player_name, playerStats);
           strcat(endGameStats, playerStats);
+          free(playerStats);
         }
       }
     }
@@ -380,6 +381,8 @@ bool handleMessage(void* arg, const addr_t from, const char* message){
             message_send(gameGrid->playerArray[i]->player_address, (const char*)quitMessage);
       }
     }
+    free(endGameStats);
+    free(quitMessage);
     grid_delete(gameGrid);  // deletes all the players
     return true;
   }
